@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>External Concessions · Fynd Commerce</title>
+  <link rel="stylesheet" href="/assets/core.css">
+  <link rel="stylesheet" href="/assets/fynd-console.css">
+  <link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="/assets/workflow.css"></head>
+<body class="ati-body fynd-console" data-app="ati">
+  <header class="fynd-header">
+    <a class="fynd-commerce-brand" href="/" aria-label="Fynd Commerce home">
+      <span class="fynd-loop-mark" aria-hidden="true"><i></i><i></i></span>
+      <span class="fynd-brand-divider"></span>
+      <strong>Commerce</strong>
+    </a>
+    <button class="fynd-command" type="button" data-action="globalSearch">
+      <span class="fynd-search-icon" aria-hidden="true"></span>
+      <span>Search vendors, orders, SKUs or returns</span>
+      <kbd>Ctrl/⌘ + K</kbd>
+    </button>
+    <div class="fynd-profile-area">
+      <span class="environment">DEMO</span>
+      <button class="fynd-header-icon" type="button" aria-label="Support" data-toast="Support centre opened">◖</button>
+      <button class="fynd-header-icon" type="button" aria-label="Notifications" data-action="allNotifications">●</button>
+      <div class="fynd-profile-chip">
+        <span class="fynd-profile-avatar">AK</span>
+        <span><b>AL TAYER INSIGNIA</b><small>Aline Kharouf</small></span>
+      </div>
+      <span class="fynd-profile-orb" aria-hidden="true">✦</span>
+    </div>
+  </header>
+
+  <div class="fynd-console-shell">
+    <nav class="fynd-global-rail" aria-label="Fynd product navigation">
+      <div class="fynd-rail-primary">
+        <a href="#" data-ati-nav="Vendors & brands"><i>▤</i><span>Company</span></a>
+        <a href="#" data-ati-nav="Catalogue"><i>▣</i><span>Products</span></a>
+        <a class="active" href="#" data-ati-nav="Orders & SLA"><i>◫</i><span>Orders</span></a>
+        <a href="#" data-ati-nav="Reporting"><i>⌁</i><span>Analytics</span></a>
+        <a href="#" data-ati-nav="Rules & policies"><i>⌘</i><span>Custom<br>Apps</span></a>
+        <a href="#" data-ati-nav="Integrations"><i>✣</i><span>Extensions</span></a>
+        <span class="fynd-rail-divider"></span>
+        <a href="#" data-ati-nav="Integrations"><i>⌘</i><span>Konnect</span></a>
+        <a href="#" data-ati-nav="Inventory"><i>▰</i><span>Store OS</span></a>
+        <a href="#" data-ati-nav="Commercials"><i>▭</i><span>Rich Sp...</span></a>
+        <a href="#"><i>•••</i><span>More</span></a>
+      </div>
+      <a class="fynd-new-channel" href="#"><i>＋</i><span>New Sales<br>Channel</span></a>
+    </nav>
+
+    <aside class="fynd-context-nav">
+      <div class="fynd-context-heading">
+        <span class="fynd-context-mark">EC</span>
+        <span><strong>External Concessions</strong><small>Al Tayer Insignia</small></span>
+      </div>
+      <div class="fynd-context-label">MARKETPLACE OPERATIONS</div>
+      <div id="ati-nav"></div>
+      <div class="fynd-context-foot"><span>Connected</span><small>Powered by Fynd</small></div>
+    </aside>
+
+    <main id="ati-main" class="ati-main"></main>
+  </div>
+
+  <button class="fynd-spark" type="button" aria-label="Fynd assistant" data-toast="Fynd assistant is ready">✦</button>
+  <div id="drawer-root"></div>
+  <div id="modal-root"></div>
+  <div id="toast" class="toast"></div>
+  <script src="/assets/jszip.min.js"></script><script type="module" src="/assets/workflow.js"></script>
+</body>
+</html>

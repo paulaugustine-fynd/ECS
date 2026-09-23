@@ -1,0 +1,3 @@
+sku,name,ar,category,price,parent,color,size,asset
+DEMO-IMPORT-001,Demo scarf - synthetic sample,وشاح تجريبي,Accessories,1,DEMO-001,Ivory,One size,DAM://demo/scarf
+DEMO-IMPORT-002,Demo missing Arabic example,,Accessories,1,DEMO-002,Black,One size,DAM://demo/scarf

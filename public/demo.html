@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0; url=/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Interactive concept for Bloomingdale's UAE external concessions, powered by Fynd." />
+  <title>Bloomingdale's Partner Network · Powered by Fynd</title>
+  <link rel="stylesheet" href="demo.css" />
+</head>
+<body>
+  <div class="demo-ribbon">
+    <span><b>INTERACTIVE CONCEPT</b> · ATI External Concessions Platform</span>
+    <div class="demo-switch" aria-label="Choose demo workspace">
+      <button data-mode="partner" class="active">Partner onboarding</button>
+      <button data-mode="ops">ATI operations</button>
+    </div>
+  </div>
+
+  <main id="partner-view" class="partner-shell">
+    <header class="bloom-header">
+      <div class="utility-bar"><span>United Arab Emirates · AED</span><span>Help & support&nbsp;&nbsp; · &nbsp;&nbsp;العربية</span></div>
+      <div class="brand-row"><button class="brand-button" data-reset><span class="wordmark">BLOOMINGDALE'S</span><span class="partner-label">PARTNER NETWORK</span></button><span class="secure-label">● SECURE PARTNER EXPERIENCE</span></div>
+    </header>
+
+    <section id="partner-landing" class="onboarding-hero">
+      <div class="hero-copy">
+        <div class="eyebrow">EXTERNAL CONCESSIONS · UAE</div>
+        <h1>Bring your brand to<br>Bloomingdale's</h1>
+        <p>Join a curated network of exceptional brands. Start your application, share your catalogue, and prepare for a seamless launch across our digital destination.</p>
+        <button class="primary-action" id="start-application">Start your application <span>→</span></button>
+        <button class="text-action" data-open-ops>Already a partner? Open your workspace</button>
+      </div>
+      <aside class="journey-card">
+        <div class="monogram">B</div>
+        <p class="journey-label">YOUR PARTNER JOURNEY</p>
+        <ol>
+          <li><span>01</span><div><b>Apply</b><small>Business and brand profile</small></div></li>
+          <li><span>02</span><div><b>Curate</b><small>Catalogue review and approval</small></div></li>
+          <li><span>03</span><div><b>Connect</b><small>Inventory and order readiness</small></div></li>
+          <li><span>04</span><div><b>Launch</b><small>Go live on Bloomingdale's UAE</small></div></li>
+        </ol>
+      </aside>
+      <div class="trust-row"><span>Curated selection</span><i></i><span>Guided onboarding</span><i></i><span>One operations hub</span></div>
+    </section>
+
+    <section id="application-workspace" class="application-workspace" hidden>
+      <aside class="application-sidebar">
+        <p class="sidebar-eyebrow">PARTNER APPLICATION</p>
+        <h2>Maison Élan</h2>
+        <div class="save-state"><span></span> Draft saved just now</div>
+        <nav id="application-steps" class="application-steps"></nav>
+        <div class="support-card"><b>Need assistance?</b><p>Your onboarding specialist is here to help.</p><button>Contact partner support</button></div>
+      </aside>
+      <div class="application-main">
+        <div class="application-topline"><button class="back-link" data-reset>← Back to introduction</button><span id="application-progress">20% complete</span></div>
+        <div id="application-content"></div>
+      </div>
+    </section>
+  </main>
+
+  <main id="ops-view" class="ops-shell" hidden>
+    <aside class="fynd-rail">
+      <div class="fynd-mark">◇</div>
+      <nav id="rail-nav" aria-label="Operations navigation"></nav>
+      <div class="rail-bottom"><button title="Settings">⚙</button><div class="avatar">AK</div></div>
+    </aside>
+    <div class="ops-frame">
+      <header class="ops-header">
+        <div><span class="ops-product">Concessions</span><span class="ops-environment">DEMO</span></div>
+        <label class="global-search">⌕ <input placeholder="Search vendors, SKUs or orders" /></label>
+        <div class="header-actions"><button title="Notifications">●</button><span class="org-chip"><b>ATI</b><small>Aline Kharouf</small></span></div>
+      </header>
+      <div class="ops-body">
+        <aside class="section-nav"><div class="section-title">External Concessions</div><nav id="section-nav"></nav><div class="powered"><span>Fynd</span><small>Commerce infrastructure</small></div></aside>
+        <section class="ops-content"><div id="ops-content"></div></section>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="demo.js"></script>
+</body>
+</html>
