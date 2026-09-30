@@ -1,2 +1,2 @@
-import {CoachJourney} from '../../../../components/coach-journey';
-export default function CoachOnboarding(){return <CoachJourney partner/>;}
+import {redirect} from 'next/navigation';
+export default function CoachOnboarding(){redirect('/onboarding');}

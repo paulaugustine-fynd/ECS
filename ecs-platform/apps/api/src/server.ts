@@ -292,7 +292,17 @@ export async function createServer(options:{verifyResponseContracts?:boolean}={}
     permit(req.actor,'fulfilment',true);requireCondition(env.DEMO_MODE==='true','DISABLED','Demo controls disabled',403);
     const input=demoOrderInput.parse(req.body);
     requireCondition(input.routingPolicy!=='MANUAL_OVERRIDE','MANUAL_INPUT_REQUIRED','Manual routing requires explicit line locations; use the signed order contract');
-    const raw=await demoWebhook({eventId:`demo-${input.externalOrderId}`,type:'order.created',companyId:req.actor.companyId,market:'AE',data:{...demoOrder,...input}}),timestamp=String(Math.floor(Date.now()/1000));
+    const {partnerId,...orderOptions}=input;
+    let basket=demoOrder;
+    if(partnerId){
+      const partner=await db.partner.findFirst({where:{AND:[{id:partnerId},partnerScope(req.actor)]}});
+      requireCondition(partner,'NOT_FOUND','Partner not found',404);
+      requireCondition(partner.status==='ACTIVE','PARTNER_NOT_ACTIVE','Complete launch checks and open this partner for sales first',409);
+      const products=await db.product.findMany({where:{partnerId,companyId:req.actor.companyId,market:'AE',currency:'AED',status:'PUBLISHED',saleStatus:'ENABLED'},orderBy:{sku:'asc'},take:3});
+      requireCondition(products.length,'NO_PUBLISHED_PRODUCTS','Publish products for this partner before receiving a sample order',409);
+      basket={...demoOrder,total:products.reduce((sum,p)=>sum.plus(p.price),new Prisma.Decimal(0)).toFixed(2),lines:products.map((p,i)=>({id:'ol_'+(i+1),sku:p.sku,quantity:1,unitGross:p.price.toFixed(2),vendorDiscount:'0.00',operatorDiscount:'0.00'}))};
+    }
+    const raw=await demoWebhook({eventId:`demo-${input.externalOrderId}`,type:'order.created',companyId:req.actor.companyId,market:'AE',data:{...basket,...orderOptions}}),timestamp=String(Math.floor(Date.now()/1000));
     const response=await app.inject({method:'POST',url:'/api/v1/webhooks/SFCC',headers:{'content-type':'application/json','x-webhook-timestamp':timestamp,'x-webhook-signature':signWebhook(raw,timestamp,env.WEBHOOK_SECRET)},payload:raw});
     requireCondition(response.statusCode===202,'INTAKE_REJECTED',response.json().error?.message??'Signed intake rejected',response.statusCode);
     await transaction(tx=>audit(tx,req.actor,req.id,'demo.sfcc-order',input.externalOrderId,null,input,'Presenter generated a signed fictional SFCC order'));

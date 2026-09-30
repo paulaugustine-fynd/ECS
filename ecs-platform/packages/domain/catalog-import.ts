@@ -17,14 +17,15 @@ const value=z.string().max(500);
 const rawSchema=z.object(Object.fromEntries(importFields.map(k=>[k,value.optional()]))).strict();
 export type ImportInput=Record<string,string>;
 type SavedRow={number:number;input:ImportInput;excluded?:boolean;reason?:string;duplicateApproval?:{fingerprint:string;reason:string};productId?:string};
-const brands=[{id:'br_maz',name:'Maison Azure'},{id:'br_lum',name:'Lumera'},{id:'br_nrh',name:'Northline Home'},{id:'br_orb',name:'Orbit'}];
+const brands=[{id:'br_coach',name:'Coach'},{id:'br_maz',name:'Maison Azure'},{id:'br_lum',name:'Lumera'},{id:'br_nrh',name:'Northline Home'},{id:'br_orb',name:'Orbit'}];
 // Explicit AE demo policies from the supplied sample assortment, not ATI tenant rules.
 export const importFloors:Record<string,string>={
+ 'br_coach|Women/Handbags/Shoulder Bags':'1000.00', // Fictional demo policy, not Coach pricing advice.
  'br_maz|Women/Dresses/Midi':'1750.00','br_maz|Women/Handbags/Shoulder Bags':'3000.00',
  'br_lum|Beauty/Skincare/Serums':'280.00','br_lum|Beauty/Makeup/Lips':'130.00',
  'br_nrh|Home/Home Fragrance/Candles':'220.00','br_nrh|Home/Bedding/Duvet Covers':'750.00','br_orb|Men/Shoes/Sneakers':'650.00',
 };
-const media=new Set(['maz-dress-black','maz-bag-tan','lum-serum','lum-lip-ruby','nrh-candle','nrh-duvet','orb-sneaker'].map(n=>`/demo-assets/${n}.svg`));
+const media=new Set(['coach-tabby','coach-brooklyn','coach-swinger','maz-dress-black','maz-bag-tan','lum-serum','lum-lip-ruby','nrh-candle','nrh-duvet','orb-sneaker'].map(n=>`/demo-assets/${n}.svg`));
 const hash=(v:unknown)=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const mappingHash=(v:unknown):string=>{if(v===null)return hash(null);const m=fieldMapping.parse(v&&typeof v==='object'?Object.fromEntries(Object.entries(v).filter(([k])=>k!=='version')):v);return hash([Object.entries(m.fields).sort(),[...m.ignoredHeaders].sort(),m.values.map(r=>[r.field,r.from,r.to]).sort()]);};
 export const importRequest=z.discriminatedUnion('source',[

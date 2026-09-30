@@ -1,7 +1,6 @@
 'use client';
 import { useEffect,useState } from 'react';
 import {SimulationStudio} from './simulation-studio';
-import {CoachJourney} from './coach-journey';
 import {SystemUpdates} from './system-updates';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -80,8 +79,6 @@ export function Console(){
   if(section.startsWith('catalog/imports'))titles[section]=t('Catalogue imports','استيراد الكتالوج');
   if(!vendor&&user?.role.startsWith('ATI_'))nav.splice(1,0,['simulations',t('Simulation Studio','استوديو المحاكاة'),Activity]);
   if(section.startsWith('simulations'))titles[section]=t('Simulation Studio','استوديو المحاكاة');
-  if(!vendor&&user?.role.startsWith('ATI_'))nav.splice(1,0,['coach','Coach UAE walkthrough',BookOpen]);
-  if(section.startsWith('coach'))titles[section]='Coach UAE walkthrough';
   async function openPartner(id:string){setError('');setDecisionReason('');try{setSelected(await api<Partner>(`/partners/${id}`));}catch(e){setError((e as Error).message);}}
   async function command(action:string){if(!selected)return;const reason=['request-info','reject','pause','suspend','offboard','authorize-brand'].includes(action)?decisionReason.trim():undefined;if(reason!==undefined&&reason.length<5)return;setBusy(true);setError('');try{await api(`/partners/${selected.id}/commands`,{action,expectedVersion:selected.version,reason});await openPartner(selected.id);await load();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
   const allowedActions=selected?({SUBMITTED:['review'],UNDER_REVIEW:['request-info','approve','reject'],APPROVED:['sync-erp','map-fynd','sync-inventory','activate'],ACTIVE:['map-fynd','sync-inventory','pause','suspend'],PAUSED:['map-fynd','sync-inventory','activate','suspend'],SUSPENDED:['offboard']} as Record<string,string[]>)[selected.status]??[]:[];
@@ -94,8 +91,7 @@ export function Console(){
     <div className="page-title"><div><h1>{titles[section]??'Workspace'}</h1><p>{t('One retail experience. Connected partner operations.','تجربة تجزئة واحدة. عمليات شركاء متصلة.')}</p></div><button className="button" onClick={()=>{setRefreshToken(v=>v+1);void load();}}><RefreshCw size={15}/>{t('Refresh','تحديث')}</button></div>
     {error&&<div className="error" role="alert">{error} {!user&&<Link href="/login">Sign in</Link>}</div>}
     {user&&!vendor&&section.startsWith('simulations')&&<SimulationStudio key={section} scenarioId={section.split('/')[1]} ar={ar}/>}
-    {user&&!vendor&&section.startsWith('coach')&&<CoachJourney key={section}/>}
-    {user&&!vendor&&section==='dashboard'&&<Link className="sim-banner" href="/operator/coach"><BookOpen size={20}/><div><b>Start here: Coach UAE walkthrough</b><span>One saved journey from application to statement, with clear steps for every team</span></div><ArrowUpRight size={18}/></Link>}
+    {user&&!vendor&&section==='dashboard'&&<Link className="sim-banner" href="/operator/partners"><BookOpen size={20}/><div><b>Partner operations</b><span>Coach UAE uses these same partner, product, stock, order and finance screens.</span></div><ArrowUpRight size={18}/></Link>}
     {section==='partners'&&canManage&&<PartnerInvitation onCreated={load}/>}
     {user&&section==='dashboard'&&<><div className="welcome"><div><span className="eyebrow">{t('YOUR BUSINESS AT A GLANCE','لمحة عن أعمالك')}</span><h2>{t('Good to see you,','أهلاً بك،')} {user.name.split(' ')[0]}.</h2><p>{t('Review new applications and keep your concession partners moving.','راجع الطلبات الجديدة وتابع شركاء الامتيازات.')}</p><Link className="primary" href={`${root}/partners`}>{t('Review partners','مراجعة الشركاء')}<ArrowUpRight size={16}/></Link></div><div className="welcome-mark"><Layers3 size={64}/><span>ECS</span></div></div>
     <div className="metrics">{[[partners.length,t('Partner records','سجلات الشركاء')],[partners.filter(p=>p.status==='ACTIVE').length,t('Active partners','الشركاء النشطون')],[products.length,t('Catalogue items','عناصر الكتالوج')],[products.filter(p=>p.status==='PUBLISHED').length,t('Published products','منتجات منشورة')]].map(([n,l])=><div className="metric" key={l}><span>{l}</span><strong>{n}</strong><small>{t('From your authorized records','من سجلاتك المصرح بها')}</small></div>)}</div>
