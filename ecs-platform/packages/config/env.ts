@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { z } from 'zod';
+import {configureHostedDemo,hostedDemo} from './hosted-demo';
 
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -13,8 +14,9 @@ const schema = z.object({
   DEMO_MODE: z.enum(['true', 'false']).default('true'),
 });
 export function readEnv() {
+  configureHostedDemo();
   const env = schema.parse(process.env);
-  if (env.NODE_ENV === 'production' && env.DEMO_MODE === 'true') {
+  if (env.NODE_ENV === 'production' && env.DEMO_MODE === 'true' && !hostedDemo()) {
     throw new Error('Demo seed accounts and controls must not run in production. Use a restricted development deployment.');
   }
   return env;

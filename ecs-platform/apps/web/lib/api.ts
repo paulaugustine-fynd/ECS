@@ -1,6 +1,7 @@
 export type User={id:string;name:string;email:string;role:string;companyId:string;partnerId:string|null;markets:string[];locale:string};
 let csrf='';
 export async function api<T>(path:string,body?:unknown):Promise<T>{
+  if(process.env.NEXT_PUBLIC_ECS_HOSTED_DEMO==='true'&&body!==undefined&&new TextEncoder().encode(JSON.stringify(body)).length>3900000)throw new Error('Hosted demo upload is too large. Use a file below 2.8 MB; larger uploads require the direct-upload production integration.');
   const response=await fetch(`/api/v1${path}`,{method:body===undefined?'GET':'POST',credentials:'same-origin',headers:body===undefined?{}:{'content-type':'application/json','x-csrf-token':csrf},body:body===undefined?undefined:JSON.stringify(body)});
   const result=await response.json();
   if(!response.ok)throw new Error(`${result.error?.message??'Request failed'}${result.error?.correlationId?` · ${result.error.correlationId.slice(0,8)}`:''}`);

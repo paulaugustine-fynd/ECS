@@ -1,5 +1,7 @@
 import { readEnv, type System } from '../config/env';
 import {captureDestination, validateDestination, type Destination} from './destination';
+import {inlineMockOrigin} from '../config/hosted-demo';
+import {inlineMockRequest} from './inline-mock';
 export class AdapterError extends Error {
   constructor(message: string, public retryable: boolean, public statusCode?: number) {super(message);}
 }
@@ -20,17 +22,19 @@ export function adapter(system: System, pinned?: Destination): IntegrationPort {
   const circuitKey = `${system}:${origin}`;
   return {
     async health() {
-      try {return (await fetch(`${origin}/health`, {redirect:'error',signal:AbortSignal.timeout(2000)})).ok;} catch {return false;}
+      try {return (origin===inlineMockOrigin?await inlineMockRequest('/health'):await fetch(`${origin}/health`, {redirect:'error',signal:AbortSignal.timeout(2000)})).ok;} catch {return false;}
     },
     async execute(operation, payload, ctx) {
       const circuit = circuits.get(circuitKey);
       if (circuit && circuit.until > Date.now()) throw new AdapterError(`${system} circuit is open`, true);
       try {
-        const response = await fetch(`${origin}/systems/${system}/${operation}`, {
-          method:'POST', redirect:'error', signal:AbortSignal.timeout(8000),
+        const path=`/systems/${system}/${operation}`;
+        const init={
+          method:'POST' as const, redirect:'error' as const, signal:AbortSignal.timeout(8000),
           headers:{'content-type':'application/json','x-mock-secret':env.MOCK_SECRET,'x-idempotency-key':ctx.idempotencyKey,'x-correlation-id':ctx.correlationId},
           body:JSON.stringify(payload),
-        });
+        };
+        const response = origin===inlineMockOrigin?await inlineMockRequest(path,init):await fetch(`${origin}${path}`,init);
         if (!response.ok) throw new AdapterError(`${system} returned HTTP ${response.status}`, response.status >= 500 || response.status === 429, response.status);
         const result = await response.json() as ExternalResult;
         if (!result.externalId || result.mode !== 'mock' || result.system !== system) throw new AdapterError('Invalid adapter response', false);

@@ -5,6 +5,7 @@ import {type Actor,permit,scope} from '../auth/policy';
 import {digest} from '../auth/security';
 import {audit,enqueue,json,transaction} from '../db/transaction';
 import {readEnv} from '../config/env';
+import {isDemoRuntime} from '../config/hosted-demo';
 import {exchangeCancellationPayload,exchangeCancellationResult,exchangePaymentPayload} from '../contracts/exchange-payment';
 import {AdapterError} from '../integrations/adapter';
 import {executionInclude,executionView,queueExchangeCancellationRefund} from './exchange-checkout';
@@ -18,7 +19,7 @@ import {launchFingerprint} from './launch-contract';
 export const exchangeCancellationInput=z.object({expectedVersion:z.number().int().positive(),reason:z.string().trim().min(5).max(1000)}).strict();
 type Input=z.infer<typeof exchangeCancellationInput>;
 const same=(a:unknown,b:unknown)=>launchFingerprint(a)===launchFingerprint(b);
-function demoOnly(){const e=readEnv();requireCondition(e.DEMO_MODE==='true'&&e.NODE_ENV!=='production','DEMO_ONLY','Replacement cancellation is a local simulated workflow',403);}
+function demoOnly(){readEnv();requireCondition(isDemoRuntime(),'DEMO_ONLY','Replacement cancellation is a simulated workflow',403);}
 
 async function requestCancellation(tx:Prisma.TransactionClient,actor:Actor,id:string,input:Input,correlationId:string,cause:'OPERATOR_CANCELLED'|'PAYMENT_HOLD_EXPIRED'){
  const e=await tx.exchangeExecution.findFirst({where:{exchangeId:id,...scope(actor)},include:executionInclude});requireCondition(e,'NOT_FOUND','Replacement execution not found',404);

@@ -9,12 +9,14 @@ import locations from '../seed/locations.json';
 import stock from '../seed/inventory.json';
 import users from '../seed/users.json';
 import { sampleDocument,sampleApplication } from './document-fixtures';
+import type {Prisma} from '@prisma/client';
+import {isDemoRuntime} from '../packages/config/hosted-demo';
 
-export async function seedDemo() {
-  if (process.env.NODE_ENV === 'production' || process.env.DEMO_MODE === 'false') throw new Error('Demo seed is disabled outside local demo mode');
-  const existing=await db.partner.count();
+export async function seedDemo(existingTransaction?:Prisma.TransactionClient) {
+  if (!isDemoRuntime()) throw new Error('Demo seed requires an explicit local or isolated hosted demo');
+  const existing=await (existingTransaction??db).partner.count();
   if(existing) throw new Error('Database already contains partners. Seed will not overwrite business state. Use the explicitly guarded demo:reset for the local demo database.');
-  await db.$transaction(async tx=>{
+  const seed=async(tx:Prisma.TransactionClient)=>{
     await tx.demoClock.create({data:{id:'main',now:new Date('2026-09-23T08:00:00Z')}});
     for(const p of partners){
       await tx.partner.create({data:{id:p.id,code:p.code,companyId:'cmp_ati_uae',legalName:p.legalName,displayName:p.displayName,status:p.status,markets:p.countries,erpVendorId:p.erpVendorId,riskTier:p.riskTier,trusted:p.trustedCatalogVendor,brandApproved:p.status==='ACTIVE',fyndMapped:true,inventorySynced:true,testOrderPassed:true}});
@@ -54,7 +56,8 @@ export async function seedDemo() {
       {email:'admin@ateliernoor.demo',name:'Atelier Noor Partner',role:'VENDOR_ADMIN',partnerId:'vnd_onboard'},
     ]) await tx.user.create({data:{...u,companyId:'cmp_ati_uae',passwordHash:hash,markets:['AE']}});
     await tx.auditEvent.create({data:{id:'seed-audit',companyId:'cmp_ati_uae',actorId:'seed',action:'demo.seed',entityId:'main',after:{fixtureVersion:1,source:'ATI supplied build pack',corrections:['Separate onboarding fixture','GTIN check digits','Replacement dress size L']},correlationId:'seed-v1'}});
-  },{timeout:30000});
+  };
+  if(existingTransaction)await seed(existingTransaction);else await db.$transaction(seed,{timeout:30000});
 }
 if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href){
   try{await seedDemo();console.log('Seeded local ECS demo.');}finally{await db.$disconnect();}

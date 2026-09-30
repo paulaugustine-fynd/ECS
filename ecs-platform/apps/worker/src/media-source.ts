@@ -8,6 +8,7 @@ import {uploadProductMedia} from '../../../packages/domain/catalog-media';
 import {fetchImageSource} from '../../../packages/media/url';
 import {importMediaZip} from '../../../packages/domain/catalog-media-zip';
 import {bytesHash} from '../../../packages/media/image';
+import {isDemoRuntime} from '../../../packages/config/hosted-demo';
 const due=()=>({availableAt:{lte:new Date()},OR:[{status:{in:['PENDING','RETRY']}},{status:'PROCESSING',leaseUntil:{lt:new Date()}}]});
 export async function processMediaJob(id:string){
  const leaseToken=randomUUID();
@@ -20,7 +21,7 @@ export async function processMediaJob(id:string){
   let receiptIds=existing.map(r=>r.id);
   if(existing.length)requireCondition(existing.length<=10&&existing.every(r=>r.productId===job.productId&&r.partnerId===job.partnerId&&r.market===job.market&&r.sourceType===job.sourceType&&r.requestHash===job.requestHash),'DAM_EVIDENCE_MISMATCH','Stored media evidence does not match the job');
   else{
-   requireCondition(process.env.DEMO_MODE==='true'&&process.env.NODE_ENV!=='production'&&(process.env.DOCUMENT_SCAN_MODE??'mock')==='mock','MEDIA_SCANNER_UNAVAILABLE','Source imports require local demo mode and the configured mock scanner',503);
+   requireCondition(isDemoRuntime()&&(process.env.DOCUMENT_SCAN_MODE??'mock')==='mock','MEDIA_SCANNER_UNAVAILABLE','Source imports require explicit demo mode and the configured mock scanner',503);
    requireCondition(actor.active&&actor.companyId===job.companyId&&actor.markets.includes(job.market),'DAM_ACTOR_REVOKED','Original requester is no longer authorized',403);permit(actor,'catalog');
    const product=await db.product.findFirst({where:{id:job.productId,...scope(actor)}});requireCondition(product&&product.partnerId===job.partnerId&&product.market===job.market,'NOT_FOUND','Product is no longer in requester scope',404);
    requireCondition(product.version===job.expectedVersion,'STALE_VERSION','Product changed while the job was queued; create a new import for the reviewed version',409);

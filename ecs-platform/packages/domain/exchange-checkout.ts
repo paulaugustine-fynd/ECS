@@ -4,6 +4,7 @@ import {type Actor,permit,scope} from '../auth/policy';
 import {digest} from '../auth/security';
 import {audit,enqueue,json,transaction} from '../db/transaction';
 import {readEnv} from '../config/env';
+import {isDemoRuntime} from '../config/hosted-demo';
 import {exchangePaymentPayload,exchangePaymentResult} from '../contracts/exchange-payment';
 import {AdapterError} from '../integrations/adapter';
 import {previewExchangeTx} from './exchanges';
@@ -23,7 +24,7 @@ export async function getExchangeExecution(actor:Actor,id:string){
  });
 }
 export async function startExchangeCheckout(actor:Actor,id:string,input:z.infer<typeof exchangeCheckoutInput>,correlationId:string){
- permit(actor,'fulfilment',true);const env=readEnv();requireCondition(env.DEMO_MODE==='true'&&env.NODE_ENV!=='production','DEMO_ONLY','Simulated replacement checkout is available only in the local demo',403);
+ permit(actor,'fulfilment',true);readEnv();requireCondition(isDemoRuntime(),'DEMO_ONLY','Simulated replacement checkout is available only in the demo',403);
  const hash=digest(JSON.stringify(input));
  return transaction(async tx=>{
   const request=await tx.exchangeRequest.findFirst({where:{id,...scope(actor)}});requireCondition(request,'NOT_FOUND','Exchange request not found',404);

@@ -2,13 +2,16 @@ import {z} from 'zod';
 import {validateDestination} from '../integrations/destination';
 import {requireCondition,DomainError} from '../domain/errors';
 import {imageBytes,bytesHash} from './image';
+import {isDemoRuntime,inlineMockOrigin} from '../config/hosted-demo';
+import {inlineMockRequest} from '../integrations/inline-mock';
 export const damReference=z.enum(['studio-front','studio-back']);
 export const damAsset=z.object({reference:damReference,revision:z.literal('demo-v1'),fileName:z.literal('asset.png'),checksum:z.string().regex(/^[a-f0-9]{64}$/),base64:z.string().max(50000)}).strict();
 export async function fetchDamAsset(reference:string,origin:string){
- requireCondition(process.env.DEMO_MODE==='true'&&process.env.NODE_ENV!=='production','DAM_DISABLED','Only the explicit local DAM simulator is implemented',503);
+ requireCondition(isDemoRuntime(),'DAM_DISABLED','Only the explicit DAM simulator is implemented',503);
  validateDestination({destinationMode:'mock',destinationOrigin:origin});damReference.parse(reference);
  try{
-  const response=await fetch(`${origin}/dam/assets/${reference}`,{headers:{'x-mock-secret':process.env.MOCK_SECRET??''},redirect:'error',signal:AbortSignal.timeout(10000)});
+  const init={headers:{'x-mock-secret':process.env.MOCK_SECRET??''},redirect:'error' as const,signal:AbortSignal.timeout(10000)};
+  const response=origin===inlineMockOrigin?await inlineMockRequest(`/dam/assets/${reference}`,init):await fetch(`${origin}/dam/assets/${reference}`,init);
   if(!response.ok){await response.body?.cancel();throw new DomainError(response.status>=500?'DAM_TRANSIENT':'DAM_REJECTED','DAM source could not supply the requested asset',response.status>=500?503:400);}
   requireCondition(response.body,'DAM_INVALID','DAM returned no asset',400);const chunks:Uint8Array[]=[];let size=0;const reader=response.body.getReader();
   try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;requireCondition(size<=65536,'DAM_INVALID','DAM metadata response exceeds the local fixture contract',400);chunks.push(value);}}finally{await reader.cancel();}

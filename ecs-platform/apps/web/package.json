@@ -1,0 +1,7 @@
+{
+  "name": "ati-ecs-web",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {"build": "node ../../scripts/build-web.mjs", "dev": "next dev --webpack", "start": "next start"},
+  "dependencies": {"next": "^16.0.0", "react": "^19.0.0", "react-dom": "^19.0.0"}
+}

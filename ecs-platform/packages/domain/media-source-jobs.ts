@@ -10,6 +10,7 @@ import {requireCondition} from './errors';
 import {urlMediaInput,validateImageSource} from '../media/url';
 import {archiveBytes,zipMediaInput} from '../media/archive';
 import {bytesHash} from '../media/image';
+import {isDemoRuntime,inlineMockOrigin} from '../config/hosted-demo';
 export const mediaJobInput=z.object({requestId:z.string().uuid(),expectedVersion:z.number().int().positive(),sourceRef:damReference,demoFailures:z.number().int().min(0).max(3).default(0)}).strict();
 export const urlMediaJobInput=urlMediaInput.extend({demoFailures:z.number().int().min(0).max(3).default(0)}).strict();
 export const zipMediaJobInput=zipMediaInput.extend({demoFailures:z.number().int().min(0).max(3).default(0)}).strict();
@@ -21,7 +22,7 @@ export async function queueMediaJob(actor:Actor,id:string,input:z.infer<typeof m
  return queueSourceJob(actor,id,input,correlationId,'DAM',digest(JSON.stringify(input)),()=>validateDestination({destinationMode:'mock',destinationOrigin:process.env.MOCK_ORIGIN??'http://127.0.0.1:4100'}).destinationOrigin);
 }
 export async function queueUrlMediaJob(actor:Actor,id:string,input:z.infer<typeof urlMediaJobInput>,correlationId:string){
- return queueSourceJob(actor,id,{...input,sourceRef:input.url},correlationId,'URL',digest(JSON.stringify({operation:'queue-url',...input})),()=>validateImageSource(input.url).url.origin);
+ return queueSourceJob(actor,id,{...input,sourceRef:input.url},correlationId,'URL',digest(JSON.stringify({operation:'queue-url',...input})),()=>{const source=validateImageSource(input.url);return source.url.protocol==='mock:'?inlineMockOrigin:source.url.origin;});
 }
 export async function queueZipMediaJob(actor:Actor,id:string,input:z.infer<typeof zipMediaJobInput>,correlationId:string){
  return queueSourceJob(actor,id,{...input,sourceRef:input.fileName},correlationId,'ZIP',digest(JSON.stringify({operation:'queue-zip',...input})),()=> 'local://quarantined-archive',()=>{
@@ -29,7 +30,7 @@ export async function queueZipMediaJob(actor:Actor,id:string,input:z.infer<typeo
  });
 }
 async function queueSourceJob(actor:Actor,id:string,input:{requestId:string;expectedVersion:number;sourceRef:string;demoFailures:number},correlationId:string,sourceType:'DAM'|'URL'|'ZIP',hash:string,destination:()=>string,archive?:()=>{bytes:Buffer;byteSize:number;checksum:string}){
- await owned(actor,id);requireCondition(process.env.DEMO_MODE==='true'&&process.env.NODE_ENV!=='production','DAM_DISABLED','Source jobs currently require explicit local demo mode',503);
+ await owned(actor,id);requireCondition(isDemoRuntime(),'DAM_DISABLED','Source jobs require explicit demo mode',503);
  const run=()=>transaction(async tx=>{
   const p=await tx.product.findFirst({where:{id,...scope(actor)}});requireCondition(p,'NOT_FOUND','Product not found',404);
   const previous=await tx.mediaSourceJob.findUnique({where:{companyId_requestId:{companyId:actor.companyId,requestId:input.requestId}}});

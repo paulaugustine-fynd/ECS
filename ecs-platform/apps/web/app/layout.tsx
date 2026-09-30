@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import {DemoHeartbeat} from '../components/demo-heartbeat';
 import './styles.css';
 import './catalog.css';
 import './media-review.css';
@@ -19,4 +20,4 @@ import './brand-rights.css';
 import './imports.css';
 import './launch-readiness.css';
 export const metadata:Metadata={title:'ATI · External Concessions',description:'Local ECS demonstration. Proposed integrations; no live commerce connection.',robots:{index:false,follow:false}};
-export default function Layout({children}:{children:React.ReactNode}){return <html lang="en"><body>{children}</body></html>;}
+export default function Layout({children}:{children:React.ReactNode}){return <html lang="en"><body>{children}{process.env.ECS_HOSTED_DEMO_PROJECT?<DemoHeartbeat/>:null}</body></html>;}

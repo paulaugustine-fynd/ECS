@@ -63,9 +63,10 @@ const publicUser = (u: User) => ({id:u.id,name:u.name,email:u.email,role:u.role,
 
 export async function createServer(options:{verifyResponseContracts?:boolean}={}) {
   const env = readEnv();
+  const origins=[env.WEB_ORIGIN,...(process.env.ECS_HOSTED_DEMO_PROJECT&&process.env.VERCEL_URL?[`https://${process.env.VERCEL_URL}`]:[])];
   const app = Fastify({logger:{serializers:{req(req){return {method:req.method,url:req.url?.split('?')[0],hostname:req.hostname,remoteAddress:req.ip};}},level:env.NODE_ENV === 'test'?'silent':'info',redact:['req.headers.cookie','req.headers.authorization','req.headers.x-csrf-token','req.headers.x-mock-secret','body.password','body.token','body.base64']},bodyLimit:1024*1024,genReqId:()=>randomUUID()});
   await app.register(cookie);
-  await app.register(cors,{origin:env.WEB_ORIGIN,credentials:true});
+  await app.register(cors,{origin:origins,credentials:true});
   await app.register(rateLimit,{max:200,timeWindow:60000,keyGenerator:async req=>{
     // The web proxy shares an IP across partners. Only a currently valid server
     // session earns a user bucket; arbitrary cookies/forwarded headers do not.
@@ -96,7 +97,7 @@ export async function createServer(options:{verifyResponseContracts?:boolean}={}
   });
   app.addHook('onRequest',async (req,reply) => {
     reply.header('x-correlation-id',req.id).header('x-content-type-options','nosniff').header('cache-control','no-store').header('x-frame-options','DENY');
-    if (['POST','PUT','PATCH','DELETE'].includes(req.method) && req.headers.origin && req.headers.origin !== env.WEB_ORIGIN) throw new DomainError('ORIGIN_FORBIDDEN','Origin is not allowed',403);
+    if (['POST','PUT','PATCH','DELETE'].includes(req.method) && req.headers.origin && !origins.includes(req.headers.origin)) throw new DomainError('ORIGIN_FORBIDDEN','Origin is not allowed',403);
   });
   app.setErrorHandler((error,req,reply) => {
     const detail = error as Error & {validation?:unknown;statusCode?:number};

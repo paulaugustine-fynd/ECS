@@ -1,4 +1,5 @@
 import type { System } from '../config/env';
+import {inlineMockOrigin} from '../config/hosted-demo';
 
 export type Destination = {destinationMode: string; destinationOrigin: string};
 
@@ -6,6 +7,7 @@ export type Destination = {destinationMode: string; destinationOrigin: string};
 // Every queued command records its destination; dispatch must not re-read mode/origin.
 export function validateDestination(value: Destination): Destination {
   if (value.destinationMode !== 'mock') throw new Error('Operational live destination is not tenant-validated; no request was sent');
+  if(value.destinationOrigin===inlineMockOrigin)return {destinationMode:'mock',destinationOrigin:inlineMockOrigin};
   let origin: URL;
   try { origin = new URL(value.destinationOrigin); }
   catch { throw new Error('Invalid mock destination; no request was sent'); }

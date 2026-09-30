@@ -5,6 +5,8 @@ import {request as httpsRequest} from 'node:https';
 import {request as httpRequest,type IncomingHttpHeaders,type ClientRequest} from 'node:http';
 import {DomainError,requireCondition} from '../domain/errors';
 import {maxImageBytes} from './image';
+import {isDemoRuntime,inlineMockOrigin} from '../config/hosted-demo';
+import {inlineMockRequest} from '../integrations/inline-mock';
 export const urlMediaInput=z.object({requestId:z.string().uuid(),expectedVersion:z.number().int().positive(),url:z.string().min(1).max(2048)}).strict();
 const excluded=new BlockList();
 // Conservative exclusions include the IANA IPv4 special-purpose blocks. IPv6
@@ -16,7 +18,8 @@ async function resolveIPv4(host:string){const resolver=new Resolver({timeout:200
 // pinned afresh for each worker attempt, including after an operator replay.
 export function validateImageSource(source:string,env:Record<string,string|undefined>=process.env){
  if(source==='demo://supplier/front.png'){
-  requireCondition(env.DEMO_MODE==='true'&&env.NODE_ENV!=='production','MEDIA_URL_DISABLED','Demo source requires explicit local demo mode',403);
+  requireCondition(isDemoRuntime(env),'MEDIA_URL_DISABLED','Demo source requires explicit demo mode',403);
+  if(env.MOCK_ORIGIN===inlineMockOrigin)return {url:new URL(`${inlineMockOrigin}/media-demo/front.png`),mock:true,fileName:'front.png'};
   const origin=new URL(env.MOCK_ORIGIN??'http://127.0.0.1:4100');
   requireCondition(origin.protocol==='http:'&&origin.hostname==='127.0.0.1'&&!!origin.port&&!origin.username&&!origin.password&&!origin.search&&!origin.hash&&origin.pathname==='/','MEDIA_URL_DISABLED','Demo image origin must be the configured IPv4 loopback mock service',503);
   return {url:new URL('/media-demo/front.png',origin),mock:true,fileName:'front.png'};
@@ -47,7 +50,9 @@ export function validateImageResponse(status:number,headers:IncomingHttpHeaders,
 export async function fetchImageSource(source:string,expectedOrigin?:string){
  const env=source==='demo://supplier/front.png'&&expectedOrigin?{...process.env,MOCK_ORIGIN:expectedOrigin}:process.env;
  const destination=validateImageSource(source,env);
- requireCondition(!expectedOrigin||destination.url.origin===expectedOrigin,'MEDIA_URL_BINDING','Image source does not match its queued destination',403);
+ const origin=destination.url.protocol==='mock:'?inlineMockOrigin:destination.url.origin;
+ requireCondition(!expectedOrigin||origin===expectedOrigin,'MEDIA_URL_BINDING','Image source does not match its queued destination',403);
+ if(origin===inlineMockOrigin){const response=await inlineMockRequest('/media-demo/front.png');validateImageResponse(response.status,Object.fromEntries(response.headers.entries()),destination.fileName);return {bytes:Buffer.from(await response.arrayBuffer()),fileName:destination.fileName,mock:true};}
  const plan=await planImageRequest(source,env);
  const bytes=await new Promise<Buffer>((resolve,reject)=>{
   let done=false,req:ClientRequest|undefined;const timer=setTimeout(()=>finish(new DomainError('MEDIA_URL_TIMEOUT','Image download exceeded ten seconds',400)),10000);
