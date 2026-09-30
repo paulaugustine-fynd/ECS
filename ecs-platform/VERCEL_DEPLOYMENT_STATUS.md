@@ -1,6 +1,6 @@
 # Full-stack Vercel deployment status
 
-This source now includes an isolated hosted-demo runtime. Deployment is not complete until hosted acceptance passes. Fictional demo credentials may be published; infrastructure secrets may not.
+The full-stack demo is live at https://ecs-beryl.vercel.app. Hosted acceptance passed on 30 September 2026. Fictional demo credentials may be published; infrastructure secrets may not.
 
 ## Hosted configuration implemented
 
@@ -11,10 +11,12 @@ This source now includes an isolated hosted-demo runtime. Deployment is not comp
 - Documents use the private `ecs-demo-documents` bucket and authorized API downloads. No public object URLs are generated.
 - The inline simulator retains durable outbox/inbox, leases, acknowledgements, idempotency, retries and replay. Bounded worker runs are triggered by authenticated API requests and a visible-page heartbeat. Jobs stay saved while idle; this is not an autonomous always-on production worker.
 - Hosted base64 uploads are limited to about 2.8 MB per file by serverless request size. Larger archives need a future direct-upload workflow.
-- Production and Preview share this dedicated fictional demo database, not separate tenants. Each separately accessed deployment needs its own correct `WEB_ORIGIN` for mutations.
+- Production and Preview share this dedicated fictional demo database, not separate tenants. The API accepts the configured `WEB_ORIGIN` and its deployment-specific HTTPS `VERCEL_URL`; arbitrary origins remain rejected.
 - The cloud schema was provisioned through a consolidated Supabase migration. Reconcile Prisma migration history before applying future migrations through Prisma CLI.
 
-Local pre-release checks passed: TypeScript, ESLint, 103 unit tests, six embedded-API/inline-simulator integration tests, and production build from the application directory. Hosted acceptance remains required.
+Local pre-release checks passed: TypeScript, ESLint, 103 unit tests, six embedded-API/inline-simulator integration tests, and production build from the application directory.
+
+Hosted checks passed: administrator/vendor login, unauthenticated access rejection, cross-partner denial, private Supabase upload and byte-for-byte download, current mock provisioning for three trading partners, signed order intake into three fulfilment legs, picking/packing/dispatch/delivery and an acknowledged mock return/refund. The fictional order `BLOOM-HOSTED-VERIFY-001` remains available as demo evidence. The return is `CLOSED`, with refund status `ACKNOWLEDGED`; no real refund was made.
 
 ## Implemented locally
 
@@ -22,7 +24,7 @@ Local pre-release checks passed: TypeScript, ESLint, 103 unit tests, six embedde
 - The bridge keeps Fastify authentication, PostgreSQL sessions, partner/role scope, CSRF/origin checks, response codes, binary downloads, multiple session cookies and request-body limits. API responses are never cached.
 - Initialization is lazy and shared within a warm process. A failed startup returns a redacted 503 and can retry on a subsequent request. Forwarded IP headers are not trusted; anonymous requests use a conservative shared rate-limit bucket. A hosted distributed limiter/edge protection remains necessary.
 
-## Original deployment checklist (items 1–5 now implemented; hosted acceptance pending)
+## Original deployment checklist (completed for the hosted mock demo)
 
 1. Provision an ECS-specific hosted PostgreSQL database. No existing unrelated database may be reused or migrated. Apply all migrations and seed only this dedicated fictional demo database; keep connection strings in deployment secrets, never GitHub.
 2. Supply durable private document/media storage. Local filesystem storage is unsuitable for a serverless deployment. Larger base64/ZIP imports need direct private object upload plus job references to stay within platform request limits.

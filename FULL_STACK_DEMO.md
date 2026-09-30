@@ -1,12 +1,14 @@
-# ECS full-stack demo source
+# ECS full-stack demo
 
-The full-stack demo is in [ecs-platform](ecs-platform/README.md). This branch preserves the existing browser-only Vercel application at the repository root. Deploying this branch with the existing Vercel settings still serves that static application; it does not host the full-stack API or worker.
+The working full-stack demo is hosted at **https://ecs-beryl.vercel.app/login**.
+
+The deployed source is [ecs-platform/apps/web](ecs-platform/apps/web), with an embedded server-side API, dedicated Supabase PostgreSQL database, private storage and bounded simulated integration workers. Vercel builds that directory, not the older static application preserved at the repository root.
 
 ## Fictional demo logins
 
-All these local demo accounts use the password `Demo123!`:
+All these accounts use password `Demo123!`:
 
-| Login | Role |
+| Login | Workspace |
 | --- | --- |
 | admin@ati.demo | ATI administrator |
 | ops@ati.demo | ATI operations |
@@ -15,29 +17,21 @@ All these local demo accounts use the password `Demo123!`:
 | fulfilment@maisonazure.demo | Vendor fulfilment |
 | admin@ateliernoor.demo | New partner onboarding |
 
-Full account list and setup: [ecs-platform/README.md](ecs-platform/README.md). Use only fictional data. These shared accounts are for an isolated demo, not a public production tenant.
+Use only fictional data. Infrastructure credentials are sensitive Vercel variables, never GitHub files.
 
-## Start locally
+## Verified on the hosted application
 
-```sh
-cd ecs-platform
-cp .env.example .env
-docker compose up -d
-pnpm install --frozen-lockfile
-pnpm db:generate
-pnpm db:migrate
-pnpm db:seed
-pnpm dev:local
-```
+- Login, PostgreSQL sessions and cross-partner access denial.
+- Private Supabase document upload and byte-for-byte authorized download.
+- Mock provisioning, signed order intake, three fulfilment legs, dispatch/delivery and a closed return with acknowledged simulated refund.
+- Failed mock job persisted to the dead-letter queue, followed by successful replay and restored readiness.
 
-Open http://localhost:3000. PostgreSQL polling runs the durable worker explicitly; Redis/BullMQ and S3/MinIO runtime verification remain pending. All external systems use mocks. Do not seed a production database.
+The fictional verification order is `BLOOM-HOSTED-VERIFY-001`.
 
-## Release evidence and limits
+## Limits
 
-- 94 unit tests and 218 PostgreSQL integration tests passed.
-- Strict TypeScript, ESLint, 121/121 OpenAPI response contracts and optimized Next build passed.
-- Last isolated Chromium run passed 14 scenarios before the final receipt-contract tightening.
-- All 54 requirements are tracked, not fully accepted: 50 partial and 4 not implemented.
-- Real credentials, local environment files, database contents, uploads, node_modules, browser reports and confidential input documents are excluded.
+All external business integrations remain mocked, including Fynd. Workers process bounded batches during authenticated API activity and visible-page polling; they are not an always-on production scheduler. Hosted uploads are limited to approximately 2.8 MB. Preview and Production share the dedicated fictional demo database.
 
-A hosted full-stack demo needs a PostgreSQL database, private API/mock-service/worker hosting, persistent document storage and restricted access. Keep demo controls isolated; the current guard intentionally rejects demo mode in a production runtime. Do not disable that guard just to deploy on Vercel.
+The 54-requirement implementation goal is **not complete** and remains paused. Hosting completion is not full functional or production-readiness acceptance.
+
+See [hosted demo guide](ecs-platform/HOSTED_DEMO.md), [deployment details](ecs-platform/VERCEL_DEPLOYMENT_STATUS.md), and [local setup](ecs-platform/README.md).
