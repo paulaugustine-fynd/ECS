@@ -1,4 +1,11 @@
 import {seed,dispatch,markets,vendor,product,available,issues,gates,routePreview,statementRows,totals,scanSlas} from './domain.js';
+// Keep the public demonstration boundary visible before starting a journey.
+if (document.body.dataset.app === 'launch') {
+ const releaseNotice = document.createElement('p');
+ releaseNotice.className = 'notice';
+ releaseNotice.textContent = 'Browser-only demo · Release 2026.09.30. All integrations, payments and acknowledgements are simulated. Changes stay in this browser; no live Fynd connection is enabled. Use sample data only.';
+ document.querySelector('.launch-copy')?.append(releaseNotice);
+}
 const KEY='ati-concessions-v5';
 let state;try{state=JSON.parse(localStorage.getItem(KEY));if(state?.version!==5)state=seed();}catch{state=seed();}
 let page=new URLSearchParams(location.search).get('page')||'Overview',selectedVendor=new URLSearchParams(location.search).get('vendor')||sessionStorage.getItem('ecp-vendor')||'V1';
