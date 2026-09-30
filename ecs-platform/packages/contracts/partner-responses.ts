@@ -8,6 +8,8 @@ import {reconciliationResponseSchemas} from './reconciliation-responses';
 import {productSalesResponse} from './product-sales-responses';
 import {operationsResponseSchemas} from './operations-responses';
 import {mediaResponseSchemas} from './media-responses';
+import {simRunResponse,simRunsResponse} from '../simulation/engine';
+import {coachResponse,coachListResponse} from '../simulation/coach-engine';
 
 const text=z.string(),date=text.datetime(),integer=z.number().int(),money=text.regex(/^-?\d+(?:\.\d+)?$/);
 export const partnerSummaryResponse=z.object({id:text,code:text,companyId:text,legalName:text,displayName:text,status:text,markets:z.array(text),erpVendorId:text.nullable(),riskTier:text,trusted:z.boolean(),brandApproved:z.boolean(),fyndMapped:z.boolean(),inventorySynced:z.boolean(),testOrderPassed:z.boolean(),version:integer.positive(),submittedAt:date.nullable(),createdAt:date,updatedAt:date}).strict();
@@ -29,6 +31,14 @@ const brandRight=z.object({id:text,partnerId:text,brand:text,market:text,categor
 const location=z.object({id:text,companyId:text,partnerId:text.nullable(),name:text,type:text,market:text,status:text,fyndId:text.nullable(),version:integer.positive(),deliveryCities:z.array(text),cutoffHour:integer,dailyCapacity:integer}).strict();
 const visibilityBase=z.object({mode:z.literal('mock'),sku:text,version:integer.positive(),externalId:text.nullable(),detail:text,purchasable:z.literal(false),notice:text}).strict();
 export const domainResponseSchemas:Record<string,ZodTypeAny>={
+ 'GET /api/v1/coach-journeys':coachListResponse,
+ 'POST /api/v1/coach-journeys':coachResponse,
+ 'GET /api/v1/coach-journeys/{id}':coachResponse,
+ 'POST /api/v1/coach-journeys/{id}/commands':coachResponse,
+ 'GET /api/v1/simulations':simRunsResponse,
+ 'POST /api/v1/simulations':simRunResponse,
+ 'GET /api/v1/simulations/{id}':simRunResponse,
+ 'POST /api/v1/simulations/{id}/commands':simRunResponse,
  ...mediaResponseSchemas,
  ...operationsResponseSchemas,
  'GET /api/v1/catalog/items/{id}/sales-control':productSalesResponse,

@@ -34,5 +34,5 @@ export async function inventoryReadiness(tx:Prisma.TransactionClient,partnerId:s
  });
  const verified=positions.filter(p=>p.passed).length;
  const missing=await tx.product.count({where:{partnerId,companyId:partner.companyId,status:'PUBLISHED',inventory:{none:{}}}});
- return {key:'inventory',label:'Current inventory acknowledged and reconciled (mock)',passed:positions.length>0&&verified===positions.length&&missing===0,detail:(positions.length?`${verified}/${positions.length} published stock positions verified against FYND and SFCC. Before activation, expected availability is zero.`:'No published stock positions to verify.')+(missing?` ${missing} published products have no stock position.`:''),positions};
+ return {key:'inventory',label:'Current inventory acknowledged and reconciled (mock)',passed:positions.length>0&&verified===positions.length&&missing===0,detail:(positions.length?`${verified}/${positions.length} published stock positions verified against FYND and SFCC. ${partner.status==='ACTIVE'?'The partner is active; available quantities reflect remaining eligible stock.':'Sales are not active; customer availability must be zero.'}`:'No published stock positions to verify.')+(missing?` ${missing} published products have no stock position.`:''),positions};
 }

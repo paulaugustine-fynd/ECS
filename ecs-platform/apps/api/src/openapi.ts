@@ -1,4 +1,6 @@
 import type {OpenAPIV3_1} from 'openapi-types';
+import {simStart,simCommand} from '../../../packages/simulation/engine';
+import {coachStart,coachCommand} from '../../../packages/simulation/coach-engine';
 import {z, type ZodTypeAny} from 'zod';
 import {zodToJsonSchema} from 'zod-to-json-schema';
 import {eventEnvelope,legacyWebhook} from '../../../packages/events/envelope';
@@ -48,6 +50,10 @@ const user=z.object({id:z.string(),name:z.string(),email:z.string().email(),role
 const error=z.object({error:z.object({code:z.string(),message:z.string(),correlationId:z.string()}).strict()}).strict();
 const errorResponse=response(error,'Rejected request; code and correlationId identify the failure.');
 const bodyContracts:Record<string,ZodTypeAny|null>={
+ '/simulations':simStart,
+ '/coach-journeys':coachStart,
+ '/coach-journeys/{id}/commands':coachCommand,
+ '/simulations/{id}/commands':simCommand,
  '/returns/{id}/exchange-preview':exchangePreviewInput,
  '/returns/{id}/exchanges':exchangeRequestInput,
  '/exchanges/{id}/cancel':exchangeCancelInput,
@@ -98,6 +104,8 @@ getPaths.add('/shipments/{id}/invoices');
 getPaths.add('/slas');
 getPaths.add('/slas/queue');getPaths.add('/slas/policies');
 getPaths.add('/notifications');
+getPaths.add('/simulations');getPaths.add('/simulations/{id}');
+getPaths.add('/coach-journeys');getPaths.add('/coach-journeys/{id}');
 getPaths.add('/notification-policies');
 getPaths.add('/exceptions');getPaths.add('/exceptions/{id}');
 getPaths.add('/shipments/{id}/issues');

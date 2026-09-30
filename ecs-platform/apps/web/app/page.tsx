@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ArrowUpRight, ShieldCheck, Layers3, Store } from 'lucide-react';
 export default function Home(){return <main className="launch">
   <header className="launch-header"><img src="/brand/bloomingdales-wordmark.svg" alt="Bloomingdale’s"/><span>AL TAYER INSIGNIA</span></header>
-  <div className="launch-intro"><span className="eyebrow">EXTERNAL CONCESSIONS · UAE</span><h1>Exceptional brands.<br/>One seamless experience.</h1><p>A connected workspace for the people behind Bloomingdale’s.<br/>From the first introduction to the final settlement.</p></div>
+  <div className="launch-intro"><span className="eyebrow">EXTERNAL CONCESSIONS · UAE</span><h1>Meet your next partner.<br/>Coach UAE.</h1><p>Follow one guided demonstration from application to final settlement.<br/>Clear steps for the partner, ATI reviewers, operations and finance.</p><Link className="primary" href="/login?next=/operator/coach">Start the Coach UAE walkthrough <ArrowUpRight size={18}/></Link><p style={{fontSize:12}}>Fictional Coach business details and sample products. External updates and payments are simulated.</p></div>
   <div className="portal-grid">{[
     {icon:Store,kicker:'FOR OUR BRAND PARTNERS',title:'Become a partner',copy:'Your application, compliance documents and launch readiness. A dedicated Bloomingdale’s journey.',href:'/login?next=/onboarding',cta:'Partner application'},
     {icon:Layers3,kicker:'FOR EXISTING PARTNERS',title:'Your brand workspace',copy:'Manage your assortment, inventory and fulfilment. Your team sees only your brand’s operations.',href:'/login?next=/vendor/dashboard',cta:'Partner sign in'},

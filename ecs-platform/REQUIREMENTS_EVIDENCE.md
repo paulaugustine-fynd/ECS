@@ -6,6 +6,8 @@ Authority: `the privately supplied Al_Tayer_ECS_CODEX_BUILD_SPEC.md`, especially
 
 ## Read this before presenting coverage
 
+- **30 September simulation addition:** a separate [Simulation Studio](SIMULATION_STUDIO.md) provides deterministic presenter scenarios mapped to all 54 IDs. Simulated outcomes are deliberately not used to relabel the native implementation rows below as accepted. Hosting and private storage have also subsequently been verified; consult [deployment status](VERCEL_DEPLOYMENT_STATUS.md) for that newer evidence.
+
 - **PARTIAL** means meaningful local implementation exists, but the complete source requirement or build-pack acceptance is not proven. It does not mean ready for deployment.
 - **NOT_IMPLEMENTED** means the requested workflow is absent; neighbouring tables, fields, fixtures or UI labels do not count as implementation.
 - No requirement is marked fully accepted. This is deliberately not a percentage-complete score. Each row must close its own gap and the cross-cutting gates below.

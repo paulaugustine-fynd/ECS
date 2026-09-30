@@ -19,5 +19,7 @@ import './commercials.css';
 import './brand-rights.css';
 import './imports.css';
 import './launch-readiness.css';
+import './simulation.css';
+import './coach.css';
 export const metadata:Metadata={title:'ATI · External Concessions',description:'Local ECS demonstration. Proposed integrations; no live commerce connection.',robots:{index:false,follow:false}};
 export default function Layout({children}:{children:React.ReactNode}){return <html lang="en"><body>{children}{process.env.ECS_HOSTED_DEMO_PROJECT?<DemoHeartbeat/>:null}</body></html>;}

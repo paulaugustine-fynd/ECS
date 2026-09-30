@@ -5,6 +5,10 @@ import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { randomUUID } from 'node:crypto';
+import {startSimulation,getSimulation,listSimulations,commandSimulation} from '../../../packages/domain/simulations';
+import {simStart,simCommand} from '../../../packages/simulation/engine';
+import {createCoach,readCoach,listCoach,updateCoach} from '../../../packages/domain/coach-journey';
+import {coachStart,coachCommand} from '../../../packages/simulation/coach-engine';
 import {normalizeWebhook,inboxPublicSelect} from '../../../packages/events/envelope';
 import {demoWebhook} from '../../../packages/events/demo';
 import { z, ZodError } from 'zod';
@@ -114,6 +118,14 @@ export async function createServer(options:{verifyResponseContracts?:boolean}={}
     if (!['GET','HEAD'].includes(req.method)) requireCondition(req.headers['x-csrf-token'] === req.csrf,'CSRF_FAILED','Invalid CSRF token',403);
   }
   const protectedRoute = {preHandler:authenticated,schema:{security:[{session:[]}]}};
+  app.get('/api/v1/simulations',protectedRoute,async req=>listSimulations(req.actor));
+  app.get('/api/v1/coach-journeys',protectedRoute,async req=>listCoach(req.actor));
+  app.post('/api/v1/coach-journeys',protectedRoute,async req=>createCoach(req.actor,coachStart.parse(req.body),req.id));
+  app.get('/api/v1/coach-journeys/:id',protectedRoute,async req=>readCoach(req.actor,z.object({id:z.string().uuid()}).parse(req.params).id));
+  app.post('/api/v1/coach-journeys/:id/commands',protectedRoute,async req=>updateCoach(req.actor,z.object({id:z.string().uuid()}).parse(req.params).id,coachCommand.parse(req.body),req.id));
+  app.post('/api/v1/simulations',protectedRoute,async req=>startSimulation(req.actor,simStart.parse(req.body),req.id));
+  app.get('/api/v1/simulations/:id',protectedRoute,async req=>getSimulation(req.actor,z.object({id:z.string().uuid()}).parse(req.params).id));
+  app.post('/api/v1/simulations/:id/commands',protectedRoute,async req=>commandSimulation(req.actor,z.object({id:z.string().uuid()}).parse(req.params).id,simCommand.parse(req.body),req.id));
   app.get('/api/v1/reconciliation',protectedRoute,async req=>reconciliationList(req.actor,reconciliationQuery.parse(req.query)));
   app.post('/api/v1/reconciliation/shipments/:id/repair-ledger',protectedRoute,async req=>repairDeliveryLedger(req.actor,z.object({id:z.string()}).parse(req.params).id,reconciliationRepair.parse(req.body),req.id));
   app.get('/api/v1/reconciliation/evidence',protectedRoute,async req=>reconciliationDetail(req.actor,reconciliationEntity.parse(req.query)));
