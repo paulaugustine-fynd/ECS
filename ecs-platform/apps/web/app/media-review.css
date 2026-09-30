@@ -1,0 +1,6 @@
+.media-review{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+.media-review>div{min-width:0;border:1px solid #e8e4ef;border-radius:6px;padding:14px;align-items:stretch}
+.media-review img{align-self:center;max-width:100%}
+.media-review p{font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.media-review .drawer-actions{display:flex;flex-wrap:wrap;gap:8px}
+.media-review .button{font-size:11px;white-space:normal}

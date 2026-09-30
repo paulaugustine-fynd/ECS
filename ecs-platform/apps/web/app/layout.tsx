@@ -1,0 +1,22 @@
+import type { Metadata } from 'next';
+import './styles.css';
+import './catalog.css';
+import './media-review.css';
+import './product-sales.css';
+import './operations.css';
+import './invoices.css';
+import './sla.css';
+import './notifications.css';
+import './notification-policies.css';
+import './exceptions.css';
+import './shipment-issues.css';
+import './analytics.css';
+import './reconciliation.css';
+import './lifecycle.css';
+import './onboarding.css';
+import './commercials.css';
+import './brand-rights.css';
+import './imports.css';
+import './launch-readiness.css';
+export const metadata:Metadata={title:'ATI · External Concessions',description:'Local ECS demonstration. Proposed integrations; no live commerce connection.',robots:{index:false,follow:false}};
+export default function Layout({children}:{children:React.ReactNode}){return <html lang="en"><body>{children}</body></html>;}

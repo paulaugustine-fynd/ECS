@@ -1,0 +1,835 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  role         String
+  companyId    String
+  partnerId    String?
+  markets      String[]  @default(["AE"])
+  locale       String    @default("en")
+  active       Boolean   @default(true)
+  sessions     Session[]
+  notifications Notification[]
+}
+
+model Notification {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String
+  partnerId String?
+  market String
+  category String
+  severity String
+  entityType String
+  entityId String
+  eventKey String
+  policyVersion Int @default(0)
+  title String
+  message String
+  eventAt DateTime
+  createdAt DateTime @default(now())
+  readAt DateTime?
+  @@unique([userId, eventKey])
+  @@index([userId, companyId, market, readAt])
+}
+
+model NotificationPolicy {
+  id String @id @default(cuid())
+  companyId String
+  market String
+  category String
+  severity String
+  atiRoles String[]
+  vendorRoles String[]
+  version Int @default(1)
+  updatedAt DateTime @default(now()) @updatedAt
+  @@unique([companyId, market, category, severity])
+}
+
+model Session {
+  tokenHash String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  csrfToken String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Partner {
+  id             String   @id @default(cuid())
+  code           String   @unique
+  companyId      String
+  legalName      String
+  displayName    String
+  status         String   @default("INVITED")
+  markets        String[] @default(["AE"])
+  erpVendorId    String?
+  riskTier       String   @default("MEDIUM")
+  trusted        Boolean  @default(false)
+  brandApproved  Boolean  @default(false)
+  fyndMapped     Boolean  @default(false)
+  inventorySynced Boolean @default(false)
+  testOrderPassed Boolean @default(false)
+  version        Int      @default(1)
+  application    Json     @default("{}")
+  reviewReason   String?
+  submittedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  documents      Document[]
+  mediaAssets    MediaAsset[]
+  agreements     Agreement[]
+  products       Product[]
+  brandRights    BrandRight[]
+  @@index([companyId, status])
+}
+
+model BrandRight {
+  id          String @id @default(cuid())
+  partnerId   String
+  partner     Partner @relation(fields: [partnerId], references: [id])
+  brand       String
+  market      String
+  categories  String[]
+  validFrom   DateTime
+  validUntil  DateTime
+  status      String @default("DRAFT")
+  evidence    String
+  reason      String
+  version     Int @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([partnerId, brand, market, status])
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id])
+  type        String
+  objectKey   String
+  fileName    String
+  contentType String
+  checksum    String
+  byteSize    Int        @default(0)
+  scanStatus  String     @default("LEGACY_METADATA")
+  scanDetail  String?
+  storageMode String     @default("fixture")
+  version     Int      @default(1)
+  status      String   @default("PENDING")
+  expiresAt   DateTime?
+  reason      String?
+  createdAt   DateTime @default(now())
+  @@unique([partnerId, type, version])
+}
+
+model Invitation {
+  id          String   @id @default(cuid())
+  companyId   String
+  partnerId   String
+  email       String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model Agreement {
+  id          String   @id @default(cuid())
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id])
+  version     Int
+  rate        Decimal  @db.Decimal(7, 4)
+  currency    String   @default("AED")
+  cadence     String   @default("WEEKLY")
+  validFrom   DateTime
+  validUntil  DateTime
+  status      String   @default("DRAFT")
+  rules       Json
+  @@unique([partnerId, version])
+}
+
+model Product {
+  exchangeRequests ExchangeRequest[]
+  id         String  @id @default(cuid())
+  companyId  String
+  partnerId  String
+  partner    Partner @relation(fields: [partnerId], references: [id])
+  sku        String  @unique
+  gtin       String?
+  titleEn    String
+  titleAr    String
+  category   String
+  brand      String
+  market     String  @default("AE")
+  currency   String  @default("AED")
+  price      Decimal @db.Decimal(18, 3)
+  floor      Decimal @db.Decimal(18, 3)
+  status     String  @default("DRAFT")
+  version    Int     @default(1)
+  saleStatus String  @default("ENABLED")
+  saleVersion Int    @default(1)
+  saleChangedAt DateTime?
+  saleReason String?
+  data       Json
+  publications Publication[]
+  mediaIngestions MediaIngestion[]
+  inventory  Inventory[]
+  @@index([companyId, partnerId, market])
+}
+
+model MediaAsset {
+  id String @id @default(cuid())
+  companyId String
+  partnerId String
+  partner Partner @relation(fields:[partnerId],references:[id])
+  market String
+  checksum String
+  contentType String
+  byteSize Int
+  width Int
+  height Int
+  bytes Bytes
+  scanStatus String
+  quality Json
+  createdAt DateTime @default(now())
+  ingestions MediaIngestion[]
+  @@unique([companyId,partnerId,market,checksum])
+}
+
+model MediaIngestion {
+  id String @id @default(cuid())
+  companyId String
+  partnerId String
+  market String
+  productId String
+  product Product @relation(fields:[productId],references:[id])
+  assetId String
+  asset MediaAsset @relation(fields:[assetId],references:[id])
+  requestId String
+  requestHash String
+  originalChecksum String
+  sourceType String
+  sourceRef String
+  actorId String
+  correlationId String
+  productVersion Int
+  duplicate Boolean
+  createdAt DateTime @default(now())
+  @@unique([companyId,requestId])
+  @@index([productId,createdAt])
+}
+
+model MediaSourceJob {
+  id String @id @default(cuid())
+  companyId String
+  partnerId String
+  market String
+  productId String
+  actorId String
+  requestId String
+  requestHash String
+  expectedVersion Int
+  sourceType String @default("DAM")
+  sourceRef String
+  destinationOrigin String
+  correlationId String
+  demoFailures Int @default(0)
+  status String @default("PENDING")
+  version Int @default(1)
+  attempts Int @default(0)
+  cycleAttempts Int @default(0)
+  replayCount Int @default(0)
+  availableAt DateTime @default(now())
+  leaseToken String?
+  leaseUntil DateTime?
+  receiptId String?
+  receiptIds String[] @default([])
+  lastError String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([companyId,requestId])
+  @@index([status,availableAt])
+}
+
+// Raw source archive is private quarantine material, never served as an asset.
+model MediaSourceArchive {
+  jobId String @id
+  checksum String
+  byteSize Int
+  bytes Bytes
+  createdAt DateTime @default(now())
+}
+
+model Publication {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  version    Int
+  target     String
+  status     String   @default("PENDING")
+  externalId String?
+  error      String?
+  updatedAt  DateTime @updatedAt
+  @@unique([productId, version, target])
+}
+
+model CatalogImport {
+  id           String @id @default(cuid())
+  companyId    String
+  partnerId    String?
+  market       String
+  actorId      String
+  requestKey   String
+  source       String
+  fileName     String
+  checksum     String
+  originalRows Json
+  mapping      Json?
+  rows         Json
+  status       String @default("STAGED")
+  version      Int @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@unique([actorId, requestKey])
+  @@index([companyId, partnerId, market])
+}
+
+model Location {
+  id         String  @id
+  companyId  String
+  partnerId  String?
+  name       String
+  type       String
+  market     String
+  status     String
+  fyndId     String?
+  version    Int @default(1)
+  deliveryCities String[] @default(["Dubai"])
+  cutoffHour Int @default(18)
+  dailyCapacity Int @default(100)
+  inventory  Inventory[]
+}
+
+model Inventory {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id])
+  locationId   String
+  location     Location @relation(fields: [locationId], references: [id])
+  onHand       Int
+  reserved     Int      @default(0)
+  damaged      Int      @default(0)
+  unavailable  Int      @default(0)
+  safetyStock  Int      @default(0)
+  sequence     Int      @default(0)
+  revision     Int      @default(1)
+  syncedAt     DateTime?
+  lastEligible Boolean?
+  @@unique([productId, locationId])
+}
+
+model Order {
+  id             String   @id @default(cuid())
+  companyId      String
+  market         String
+  channel        String
+  externalId     String
+  currency       String
+  total          Decimal  @db.Decimal(18, 3)
+  status         String   @default("RECEIVED")
+  fyndId         String?
+  correlationId  String
+  payloadHash    String
+  lines          Json
+  deliveryCity   String
+  routingPolicy  String
+  createdAt      DateTime @default(now())
+  legs           FulfilmentLeg[]
+  invoiceReferences InvoiceReference[]
+  exchangeExecution ExchangeExecution?
+  @@unique([channel, externalId])
+  @@index([companyId, market])
+}
+
+model InvoiceReference {
+  id            String @id @default(cuid())
+  orderId       String
+  order         Order @relation(fields: [orderId], references: [id])
+  companyId     String
+  market        String
+  channel       String
+  invoiceNumber String
+  version       Int
+  status        String
+  url           String
+  issuedAt      DateTime
+  shipmentIds   String[]
+  payloadHash   String
+  receiptId     String
+  updatedAt     DateTime @updatedAt
+  @@unique([companyId, market, channel, invoiceNumber])
+  @@index([orderId])
+}
+
+model FulfilmentLeg {
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+  companyId     String
+  partnerId     String
+  market        String
+  locationId    String
+  status        String   @default("ASSIGNED")
+  fyndId        String?
+  tracking      String?
+  version       Int @default(1)
+  requestedStatus String?
+  createdAt     DateTime @default(now())
+  deadline      DateTime
+  deliveredAt   DateTime?
+  lines         Json
+  routingTrace  Json
+  issues        ShipmentIssue[]
+  @@index([companyId, partnerId, market])
+}
+
+model ShipmentIssue {
+  id              String @id @default(cuid())
+  companyId       String
+  partnerId       String
+  market          String
+  shipmentId      String
+  shipment        FulfilmentLeg @relation(fields: [shipmentId], references: [id])
+  reporterId      String
+  requestKey      String
+  code            String
+  severity        String
+  details         String
+  reportedStatus  String
+  reportedVersion Int
+  createdAt       DateTime @default(now())
+  @@unique([companyId, reporterId, requestKey])
+  @@index([companyId, partnerId, market, shipmentId])
+}
+
+model ReturnCase {
+  exchangeRequests ExchangeRequest[]
+  evidence      ReturnEvidence[]
+  id            String   @id @default(cuid())
+  companyId     String
+  partnerId     String
+  market        String
+  legId         String
+  lineId        String
+  requestKey    String @unique
+  version       Int @default(1)
+  fyndReturnId  String?
+  logisticsId  String?
+  refundId     String?
+  productId     String
+  quantity      Int
+  status        String   @default("REQUESTED")
+  reason        String
+  policy        Json
+  qc            String?
+  refund        Decimal  @db.Decimal(18, 3)
+  payableReversal Decimal @db.Decimal(18, 3)
+  chargeback    Decimal  @db.Decimal(18, 3)
+  currency      String
+  refundStatus  String   @default("NOT_REQUESTED")
+  replacementOrderId String?
+  createdAt     DateTime @default(now())
+  @@index([companyId, partnerId, market])
+}
+
+model ExchangeRequest {
+  id String @id @default(cuid())
+  companyId String
+  partnerId String
+  market String
+  returnId String
+  returnCase ReturnCase @relation(fields:[returnId],references:[id])
+  replacementProductId String
+  replacementProduct Product @relation(fields:[replacementProductId],references:[id])
+  actorId String
+  requestId String
+  requestHash String
+  correlationId String
+  status String @default("REQUESTED")
+  version Int @default(1)
+  reason String
+  quantity Int
+  currency String
+  replacementTotal Decimal @db.Decimal(18,3)
+  snapshot Json
+  createdAt DateTime @default(now())
+  cancelledAt DateTime?
+  cancelledBy String?
+  cancellationReason String?
+  reviewAction String?
+  reviewedAt DateTime?
+  reviewedBy String?
+  reviewReason String?
+  reviewSnapshot Json?
+  execution ExchangeExecution?
+  @@unique([companyId,actorId,requestId])
+  @@index([companyId,partnerId,market,returnId])
+}
+
+model ExchangeExecution {
+  id String @id @default(cuid())
+  exchangeId String @unique
+  exchange ExchangeRequest @relation(fields:[exchangeId],references:[id])
+  orderId String @unique
+  order Order @relation(fields:[orderId],references:[id])
+  companyId String
+  partnerId String
+  market String
+  actorId String
+  reason String
+  requestHash String
+  currency String
+  amount Decimal @db.Decimal(18,3)
+  paymentPayload Json
+  holdExpiresAt DateTime
+  cancellation ExchangeCancellation?
+  paymentStatus String @default("PENDING")
+  version Int @default(1)
+  purchaseReceipt Json?
+  refundReceipt Json?
+  createdAt DateTime @default(now())
+  @@index([companyId,partnerId,market])
+}
+
+model ExchangeCancellation {
+ id String @id @default(cuid())
+ executionId String @unique
+ execution ExchangeExecution @relation(fields:[executionId],references:[id])
+ actorId String
+ reason String
+ requestHash String
+ cause String
+ payload Json
+ status String @default("REQUESTED")
+ version Int @default(1)
+ sfccReceipt Json?
+ fyndReceipt Json?
+ createdAt DateTime
+ completedAt DateTime?
+}
+
+// Independent downstream simulator truth, not an ECS success flag.
+model MockExchangeState {
+ system String
+ exchangeId String
+ orderId String
+ identity Json
+ closed Boolean @default(false)
+ purchaseReceipt Json?
+ orderCreated Boolean @default(false)
+ revision Int @default(1)
+ @@id([system,exchangeId])
+ @@unique([system,orderId])
+}
+
+model ReturnEvidence {
+  id String @id @default(cuid())
+  returnId String
+  returnCase ReturnCase @relation(fields:[returnId],references:[id])
+  companyId String
+  partnerId String
+  market String
+  actorId String
+  correlationId String
+  requestId String
+  requestHash String
+  returnVersion Int
+  fileName String
+  notes String
+  originalChecksum String
+  checksum String
+  contentType String
+  byteSize Int
+  width Int
+  height Int
+  scanStatus String
+  bytes Bytes
+  createdAt DateTime @default(now())
+  @@unique([companyId,actorId,requestId])
+  @@index([returnId,createdAt])
+}
+
+model FinancialEvent {
+  id            String   @id @default(cuid())
+  companyId     String
+  partnerId     String
+  market        String
+  kind          String
+  amount        Decimal  @db.Decimal(18, 3)
+  currency      String
+  sourceId      String
+  idempotencyKey String  @unique
+  snapshot      Json
+  createdAt     DateTime @default(now())
+  settlementId  String?
+  @@index([companyId, partnerId, market, createdAt])
+}
+
+model Settlement {
+  id         String   @id @default(cuid())
+  companyId  String
+  partnerId  String
+  market     String
+  currency   String
+  status     String   @default("CALCULATED")
+  version    Int @default(1)
+  from       DateTime
+  to         DateTime
+  payable    Decimal  @db.Decimal(18, 3)
+  evidence   Json
+  exportedId String?
+  createdAt  DateTime @default(now())
+  @@index([companyId, partnerId, market])
+}
+
+model ReconciliationIssue {
+  id String @id @default(cuid())
+  companyId String
+  partnerId String
+  market String
+  entityType String
+  entityId String
+  checkKey String
+  source String
+  status String @default("OPEN")
+  version Int @default(1)
+  firstExpected String
+  firstActual String
+  expected String
+  actual String
+  firstSeenAt DateTime @default(now())
+  observedAt DateTime @default(now())
+  resolvedAt DateTime?
+  @@unique([entityType, entityId, checkKey])
+  @@index([companyId, market, partnerId, status])
+}
+
+model Outbox {
+  id             String   @id @default(cuid())
+  companyId      String
+  partnerId      String?
+  market         String   @default("AE")
+  target         String
+  destinationMode String
+  destinationOrigin String
+  operation      String
+  aggregateId    String
+  payload        Json
+  correlationId  String
+  idempotencyKey String   @unique
+  status         String   @default("PENDING")
+  attempts       Int      @default(0)
+  availableAt    DateTime @default(now())
+  leaseUntil     DateTime?
+  leaseToken     String?
+  error          String?
+  response       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  @@index([status, availableAt])
+}
+
+model IntegrationAttempt {
+  id        String   @id @default(cuid())
+  jobId     String
+  attempt   Int
+  status    String
+  durationMs Int
+  detail    Json
+  createdAt DateTime @default(now())
+}
+
+model Inbox {
+  id            String   @id @default(cuid())
+  source        String
+  eventId       String
+  type          String
+  companyId     String
+  market        String
+  payload       Json
+  payloadHash   String
+  correlationId String
+  envelopeVersion Int @default(0)
+  eventOccurredAt DateTime?
+  rawEnvelope String?
+  signatureTimestamp String?
+  signature String?
+  status        String   @default("PENDING")
+  error         String?
+  attempts      Int      @default(0)
+  availableAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  @@unique([source, eventId])
+  @@index([status, availableAt])
+}
+
+model AuditEvent {
+  id            String   @id @default(cuid())
+  companyId     String
+  partnerId     String?
+  market        String   @default("AE")
+  actorId       String
+  action        String
+  entityId      String
+  reason        String?
+  before        Json?
+  after         Json?
+  correlationId String
+  createdAt     DateTime @default(now())
+  @@index([companyId, partnerId, createdAt])
+}
+
+model Exception {
+  id         String   @id @default(cuid())
+  companyId  String
+  partnerId  String?
+  market     String
+  kind       String
+  entityId   String
+  status     String   @default("OPEN")
+  message    String
+  reason     String?
+  assigneeId String?
+  version    Int      @default(1)
+  updatedAt  DateTime @default(now()) @updatedAt
+  resolvedAt DateTime?
+  createdAt  DateTime @default(now())
+  @@unique([kind, entityId])
+  @@index([companyId, market, partnerId, status])
+}
+
+model DemoClock {
+  id  String   @id @default("main")
+  now DateTime
+}
+
+model SlaMilestone {
+  id String @id @default(cuid())
+  companyId String
+  partnerId String
+  market String
+  entityType String
+  entityId String
+  stage String
+  status String @default("ON_TRACK")
+  version Int @default(1)
+  policyVersion Int
+  origin String
+  startedAt DateTime
+  atRiskAt DateTime
+  deadline DateTime
+  breachedAt DateTime?
+  completedAt DateTime?
+  waivedAt DateTime?
+  waivedBy String?
+  reason String?
+  @@unique([entityType, entityId, stage])
+  @@index([companyId, partnerId, market, status])
+}
+
+model SlaPolicy {
+  id String @id @default(cuid())
+  companyId String
+  market String
+  stage String
+  version Int @default(1)
+  durationMinutes Int
+  warningMinutes Int
+  @@unique([companyId, market, stage])
+}
+
+model MockRecord {
+  id             String   @id @default(cuid())
+  system         String
+  idempotencyKey String
+  payloadHash    String
+  response       Json
+  createdAt      DateTime @default(now())
+  @@unique([system, idempotencyKey])
+}
+
+model AdapterFault {
+  system String @id
+  remaining Int @default(0)
+  statusCode Int @default(503)
+}
+
+model MockInventory {
+  system String
+  inventoryId String
+  revision Int
+  sellable Int
+  @@id([system, inventoryId])
+}
+
+model LaunchTest {
+ id String @id @default(cuid())
+ companyId String
+ partnerId String
+ market String
+ actorId String
+ requestId String
+ reason String
+ inventoryId String
+ fingerprint String
+ snapshot Json
+ destinationOrigin String
+ status String @default("RUNNING")
+ step Int @default(0)
+ error String?
+ createdAt DateTime @default(now())
+ completedAt DateTime?
+ @@unique([companyId, partnerId, requestId])
+ @@index([companyId, partnerId, createdAt])
+}
+
+model MockLaunchOrder {
+ runId String @id
+ fingerprint String
+ state String
+ virtualOnHand Int
+ virtualReserved Int
+}
+
+model MockMapping {
+ key String @id
+ fingerprint String
+ externalId String
+ kind String
+ snapshot Json
+}
+
+model MockStorefrontProduct {
+ productId String @id
+ companyId String
+ partnerId String
+ market String
+ version Int
+ externalId String
+ fingerprint String
+ visible Boolean @default(true)
+ content Json
+ updatedAt DateTime @updatedAt
+}

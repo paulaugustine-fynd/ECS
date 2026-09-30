@@ -1,0 +1,282 @@
+[
+  {
+    "id": "prd_maz_dress_1001",
+    "parentSku": "MAZ-DRS-1001",
+    "variantSku": "MAZ-DRS-1001-BLK-M",
+    "gtin": "6291100001017",
+    "partnerId": "vnd_maz",
+    "brandId": "br_maz",
+    "category": "Women/Dresses/Midi",
+    "status": "PUBLISHED",
+    "title": {
+      "en": "Maison Azure Silk Midi Dress - Black",
+      "ar": "فستان حرير ميدي من ميزون أزور - أسود"
+    },
+    "attributes": {
+      "colour": "Black",
+      "size": "M",
+      "material": "Silk blend",
+      "countryOfOrigin": "Italy"
+    },
+    "pricing": {
+      "currency": "AED",
+      "listPrice": "2200.00",
+      "sellingPrice": "1850.00",
+      "mapFloor": "1750.00",
+      "taxIncluded": true
+    },
+    "commercialRuleId": "cr_maz_default",
+    "media": [
+      {
+        "type": "IMAGE",
+        "url": "/demo-assets/maz-dress-black.svg",
+        "status": "APPROVED"
+      }
+    ],
+    "externalIds": {
+      "fyndProductUid": "950001",
+      "sfccProductId": "MAZ-DRS-1001-BLK-M",
+      "erpItemId": "ERP-I-500101"
+    }
+  },
+  {
+    "id": "prd_maz_bag_2001",
+    "parentSku": "MAZ-BAG-2001",
+    "variantSku": "MAZ-BAG-2001-TAN-OS",
+    "gtin": "6291100002014",
+    "partnerId": "vnd_maz",
+    "brandId": "br_maz",
+    "category": "Women/Handbags/Shoulder Bags",
+    "status": "PUBLISHED",
+    "title": {
+      "en": "Maison Azure Structured Leather Bag - Tan",
+      "ar": "حقيبة جلد منظمة من ميزون أزور - بني فاتح"
+    },
+    "attributes": {
+      "colour": "Tan",
+      "size": "One Size",
+      "material": "Leather",
+      "countryOfOrigin": "Italy"
+    },
+    "pricing": {
+      "currency": "AED",
+      "listPrice": "3500.00",
+      "sellingPrice": "3200.00",
+      "mapFloor": "3000.00",
+      "taxIncluded": true
+    },
+    "commercialRuleId": "cr_maz_bags",
+    "media": [
+      {
+        "type": "IMAGE",
+        "url": "/demo-assets/maz-bag-tan.svg",
+        "status": "APPROVED"
+      }
+    ],
+    "externalIds": {
+      "fyndProductUid": "950002",
+      "sfccProductId": "MAZ-BAG-2001-TAN-OS",
+      "erpItemId": "ERP-I-500102"
+    }
+  },
+  {
+    "id": "prd_lum_serum_3001",
+    "parentSku": "LUM-SRM-3001",
+    "variantSku": "LUM-SRM-3001-30ML",
+    "gtin": "6291100003011",
+    "partnerId": "vnd_lum",
+    "brandId": "br_lum",
+    "category": "Beauty/Skincare/Serums",
+    "status": "PUBLISHED",
+    "title": {
+      "en": "Lumera Radiance Vitamin C Serum 30 ml",
+      "ar": "سيروم لوميرا للإشراقة بفيتامين سي 30 مل"
+    },
+    "attributes": {
+      "size": "30 ml",
+      "skinType": "All",
+      "countryOfOrigin": "France"
+    },
+    "pricing": {
+      "currency": "AED",
+      "listPrice": "340.00",
+      "sellingPrice": "320.00",
+      "mapFloor": "280.00",
+      "taxIncluded": true
+    },
+    "commercialRuleId": "cr_lum_default",
+    "media": [
+      {
+        "type": "IMAGE",
+        "url": "/demo-assets/lum-serum.svg",
+        "status": "APPROVED"
+      }
+    ],
+    "externalIds": {
+      "fyndProductUid": "950003",
+      "sfccProductId": "LUM-SRM-3001-30ML",
+      "erpItemId": "ERP-I-500201"
+    }
+  },
+  {
+    "id": "prd_lum_lip_3002",
+    "parentSku": "LUM-LIP-3002",
+    "variantSku": "LUM-LIP-3002-RBY",
+    "gtin": "6291100003028",
+    "partnerId": "vnd_lum",
+    "brandId": "br_lum",
+    "category": "Beauty/Makeup/Lips",
+    "status": "APPROVED",
+    "title": {
+      "en": "Lumera Velvet Lip Colour - Ruby",
+      "ar": "أحمر شفاه لوميرا المخملي - روبي"
+    },
+    "attributes": {
+      "colour": "Ruby",
+      "finish": "Velvet",
+      "countryOfOrigin": "France"
+    },
+    "pricing": {
+      "currency": "AED",
+      "listPrice": "160.00",
+      "sellingPrice": "145.00",
+      "mapFloor": "130.00",
+      "taxIncluded": true
+    },
+    "commercialRuleId": "cr_lum_default",
+    "media": [
+      {
+        "type": "IMAGE",
+        "url": "/demo-assets/lum-lip-ruby.svg",
+        "status": "APPROVED"
+      }
+    ],
+    "externalIds": {
+      "fyndProductUid": null,
+      "sfccProductId": null,
+      "erpItemId": "ERP-I-500202"
+    }
+  },
+  {
+    "id": "prd_nrh_candle_4001",
+    "parentSku": "NRH-CND-4001",
+    "variantSku": "NRH-CND-4001-220G",
+    "gtin": "6291100004018",
+    "partnerId": "vnd_nrh",
+    "brandId": "br_nrh",
+    "category": "Home/Home Fragrance/Candles",
+    "status": "PUBLISHED",
+    "title": {
+      "en": "Northline Home Cedar & Amber Candle 220 g",
+      "ar": "شمعة نورثلاين هوم برائحة الأرز والعنبر 220 غ"
+    },
+    "attributes": {
+      "size": "220 g",
+      "scent": "Cedar & Amber",
+      "countryOfOrigin": "United Kingdom"
+    },
+    "pricing": {
+      "currency": "AED",
+      "listPrice": "260.00",
+      "sellingPrice": "240.00",
+      "mapFloor": "220.00",
+      "taxIncluded": true
+    },
+    "commercialRuleId": "cr_nrh_default",
+    "media": [
+      {
+        "type": "IMAGE",
+        "url": "/demo-assets/nrh-candle.svg",
+        "status": "APPROVED"
+      }
+    ],
+    "externalIds": {
+      "fyndProductUid": "950004",
+      "sfccProductId": "NRH-CND-4001-220G",
+      "erpItemId": "ERP-I-500301"
+    }
+  },
+  {
+    "id": "prd_nrh_duvet_4002",
+    "parentSku": "NRH-DUV-4002",
+    "variantSku": "NRH-DUV-4002-QN",
+    "gtin": "6291100004025",
+    "partnerId": "vnd_nrh",
+    "brandId": "br_nrh",
+    "category": "Home/Bedding/Duvet Covers",
+    "status": "CHANGES_REQUESTED",
+    "title": {
+      "en": "Northline Home Percale Duvet Cover - Queen",
+      "ar": ""
+    },
+    "attributes": {
+      "size": "Queen",
+      "material": "Cotton percale",
+      "countryOfOrigin": "Portugal"
+    },
+    "pricing": {
+      "currency": "AED",
+      "listPrice": "850.00",
+      "sellingPrice": "795.00",
+      "mapFloor": "750.00",
+      "taxIncluded": true
+    },
+    "commercialRuleId": "cr_nrh_default",
+    "media": [
+      {
+        "type": "IMAGE",
+        "url": "/demo-assets/nrh-duvet.svg",
+        "status": "REJECTED",
+        "reason": "Background is not compliant"
+      }
+    ],
+    "validationIssues": [
+      "ARABIC_TITLE_MISSING",
+      "IMAGE_BACKGROUND_NON_COMPLIANT"
+    ],
+    "externalIds": {
+      "fyndProductUid": null,
+      "sfccProductId": null,
+      "erpItemId": null
+    }
+  },
+  {
+    "id": "prd_orb_sneaker_5001",
+    "parentSku": "ORB-SNK-5001",
+    "variantSku": "ORB-SNK-5001-WHT-42",
+    "gtin": "6291100005015",
+    "partnerId": "vnd_orb",
+    "brandId": "br_orb",
+    "category": "Men/Shoes/Sneakers",
+    "status": "PAUSED",
+    "title": {
+      "en": "Orbit Low-Top Sneaker - White - 42",
+      "ar": "حذاء أوربت الرياضي منخفض الرقبة - أبيض - 42"
+    },
+    "attributes": {
+      "colour": "White",
+      "size": "42",
+      "countryOfOrigin": "Vietnam"
+    },
+    "pricing": {
+      "currency": "AED",
+      "listPrice": "750.00",
+      "sellingPrice": "690.00",
+      "mapFloor": "650.00",
+      "taxIncluded": true
+    },
+    "commercialRuleId": "cr_orb_default",
+    "media": [
+      {
+        "type": "IMAGE",
+        "url": "/demo-assets/orb-sneaker.svg",
+        "status": "APPROVED"
+      }
+    ],
+    "externalIds": {
+      "fyndProductUid": "950005",
+      "sfccProductId": "ORB-SNK-5001-WHT-42",
+      "erpItemId": "ERP-I-500401"
+    }
+  }
+]

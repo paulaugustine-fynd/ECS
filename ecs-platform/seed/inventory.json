@@ -1,0 +1,92 @@
+[
+  {
+    "sku": "MAZ-DRS-1001-BLK-M",
+    "locationCode": "MAZ-DXB-MALL01",
+    "onHand": 6,
+    "reserved": 1,
+    "safetyStock": 2,
+    "sellable": 3,
+    "status": "ACTIVE",
+    "asOf": "2026-09-23T08:00:00Z"
+  },
+  {
+    "sku": "MAZ-DRS-1001-BLK-M",
+    "locationCode": "MAZ-JAFZA-WH01",
+    "onHand": 20,
+    "reserved": 2,
+    "safetyStock": 2,
+    "sellable": 16,
+    "status": "ACTIVE",
+    "asOf": "2026-09-23T08:00:00Z"
+  },
+  {
+    "sku": "MAZ-BAG-2001-TAN-OS",
+    "locationCode": "MAZ-JAFZA-WH01",
+    "onHand": 3,
+    "reserved": 0,
+    "safetyStock": 1,
+    "sellable": 2,
+    "status": "ACTIVE",
+    "asOf": "2026-09-23T08:00:00Z"
+  },
+  {
+    "sku": "LUM-SRM-3001-30ML",
+    "locationCode": "LUM-DXB-WH01",
+    "onHand": 120,
+    "reserved": 8,
+    "safetyStock": 5,
+    "sellable": 107,
+    "status": "ACTIVE",
+    "asOf": "2026-09-23T08:00:00Z"
+  },
+  {
+    "sku": "LUM-LIP-3002-RBY",
+    "locationCode": "LUM-DXB-WH01",
+    "onHand": 85,
+    "reserved": 0,
+    "safetyStock": 5,
+    "sellable": 80,
+    "status": "PENDING_PUBLICATION",
+    "asOf": "2026-09-23T08:00:00Z"
+  },
+  {
+    "sku": "NRH-CND-4001-220G",
+    "locationCode": "ATI-DXB-DC01",
+    "onHand": 12,
+    "reserved": 1,
+    "safetyStock": 2,
+    "sellable": 9,
+    "status": "ACTIVE",
+    "asOf": "2026-09-23T08:00:00Z"
+  },
+  {
+    "sku": "NRH-CND-4001-220G",
+    "locationCode": "NRH-DXB-WH01",
+    "onHand": 35,
+    "reserved": 3,
+    "safetyStock": 3,
+    "sellable": 29,
+    "status": "ACTIVE",
+    "asOf": "2026-09-23T08:00:00Z"
+  },
+  {
+    "sku": "NRH-DUV-4002-QN",
+    "locationCode": "NRH-DXB-WH01",
+    "onHand": 8,
+    "reserved": 0,
+    "safetyStock": 1,
+    "sellable": 0,
+    "status": "CATALOG_NOT_PUBLISHED",
+    "asOf": "2026-09-23T08:00:00Z"
+  },
+  {
+    "sku": "ORB-SNK-5001-WHT-42",
+    "locationCode": "ORB-DXB-STORE01",
+    "onHand": 14,
+    "reserved": 1,
+    "safetyStock": 2,
+    "sellable": 0,
+    "status": "VENDOR_SUSPENDED",
+    "asOf": "2026-09-23T08:00:00Z"
+  }
+]

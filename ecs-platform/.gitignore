@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+!.env.example
+.next/
+.next-e2e/
+coverage/
+test-results/
+playwright-report/
+.local/
+*.log

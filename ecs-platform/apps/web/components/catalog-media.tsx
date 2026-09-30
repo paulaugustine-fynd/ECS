@@ -1,0 +1,19 @@
+'use client';
+import {useEffect,useState} from 'react';
+import {api} from '../lib/api';
+import type {MediaJob} from '../lib/single-flight';
+import {CatalogMediaZip} from './catalog-media-zip';
+import {CatalogMediaUrl} from './catalog-media-url';
+type Receipt={id:string;sourceRef:string;duplicate:boolean;asset:{id:string;width:number;height:number;byteSize:number;checksum:string;scanStatus:string;quality:{edgeWhitePercent:number}}};
+export function CatalogMedia({id,version,editable,moderator,onUploaded,readJobs}:{readJobs:()=>Promise<{items:MediaJob[]}>;id:string;version:number;editable:boolean;moderator:boolean;onUploaded:()=>Promise<void>}){
+ const[items,setItems]=useState<Receipt[]>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
+ const[file,setFile]=useState<{requestId:string;expectedVersion:number;fileName:string;base64:string}|null>(null);
+ useEffect(()=>{void api<{items:Receipt[]}>(`/catalog/items/${id}/media`).then(r=>setItems(r.items)).catch(e=>setError((e as Error).message));},[id,version]);
+ return <div className="catalog-form" aria-label="Private image uploads"><h3>Upload product imagery</h3><p className="footnote">PNG, JPEG or WebP · 5 MB maximum · 128–4096 pixels per side. Files stay private and require ATI moderation. Metadata is stripped; malware screening is a deterministic local mock.</p>
+ {editable?<><label>Choose product image<input type="file" accept="image/png,image/jpeg,image/webp" disabled={busy} onChange={async e=>{setError('');setMessage('');setFile(null);const picked=e.target.files?.[0];if(!picked)return;if(picked.size>5*1024*1024){setError('Image exceeds the 5 MB limit.');return;}try{const base64=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(Error('Could not read image'));reader.readAsDataURL(picked);});setFile({requestId:crypto.randomUUID(),expectedVersion:version,fileName:picked.name,base64});}catch(err){setError((err as Error).message);}}}/></label><button className="button" disabled={busy||!file} onClick={async()=>{if(!file)return;setBusy(true);setError('');try{const r=await api<{receipt:Receipt;replayed:boolean}>(`/catalog/items/${id}/media`,file);setMessage(r.receipt.duplicate?'Identical owned image already attached; provenance retained.':'Private image attached. ATI must review it before publication.');setFile(null);await onUploaded();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}}>{busy?'Validating image…':'Upload for media review'}</button></>:<p className="footnote">Media can only change on draft, rejected or changes-requested items. Published versions remain locked.</p>}
+ {error&&<p role="alert" className="error">{error}</p>}{message&&<p role="status" className="success-note">{message}</p>}
+ {items.length>0&&<details><summary>Private asset lineage · {items.length} uploads</summary>{items.map(r=><div className="evidence-row" key={r.id}><div><b>{r.sourceRef}</b><p>{r.asset.width} × {r.asset.height} · {Math.ceil(r.asset.byteSize/1024)} KB · {r.asset.scanStatus}</p><small>White-edge sample: {r.asset.quality.edgeWhitePercent}% · Human background review required</small><p><code>{r.asset.checksum.slice(0,20)}…</code>{r.duplicate?' · Duplicate retained':''}</p></div></div>)}</details>}
+ <CatalogMediaZip readJobs={readJobs} id={id} version={version} editable={editable} moderator={moderator} onImported={onUploaded}/>
+ <CatalogMediaUrl readJobs={readJobs} id={id} version={version} editable={editable} moderator={moderator} onImported={onUploaded}/>
+ <p className="footnote">The DAM connector below is a local simulator, not a configured vendor account. Images remain private ECS references in mock publish payloads, not publicly hosted Fynd assets.</p></div>;
+}

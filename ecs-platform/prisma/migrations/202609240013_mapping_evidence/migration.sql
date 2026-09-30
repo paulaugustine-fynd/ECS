@@ -1,0 +1,5 @@
+ALTER TABLE "Location" ADD COLUMN "version" INTEGER NOT NULL DEFAULT 1;
+CREATE TABLE "MockMapping" (
+ key TEXT PRIMARY KEY, fingerprint TEXT NOT NULL, "externalId" TEXT NOT NULL,
+ kind TEXT NOT NULL CHECK (kind IN ('BRAND','LOCATION')), snapshot JSONB NOT NULL
+);

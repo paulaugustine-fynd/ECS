@@ -1,0 +1,8 @@
+'use client';
+import {useState} from 'react';
+import Link from 'next/link';
+import {api} from '../lib/api';
+export function PartnerInvitation({onCreated}:{onCreated:()=>Promise<void>}){
+  const[open,setOpen]=useState(false),[email,setEmail]=useState(''),[legalName,setLegal]=useState(''),[displayName,setDisplay]=useState(''),[url,setUrl]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+  return <section className="partner-invitation"><button className="primary" onClick={()=>setOpen(!open)}>Invite a partner</button>{open&&<form className="panel catalog-form workflow-form" onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');try{const r=await api<{invitationUrl:string}>('/partners/invite',{email,legalName,displayName});setUrl(r.invitationUrl);await onCreated();}catch(err){setError((err as Error).message);}finally{setBusy(false);}}}><h3>A considered partnership starts here</h3><p>Creates a provisional partner and a single-use, 24-hour invitation. Local preview only—no email is sent.</p><div className="form-pair"><label>Legal entity<input required value={legalName} onChange={e=>setLegal(e.target.value)}/></label><label>Trading name<input required value={displayName} onChange={e=>setDisplay(e.target.value)}/></label></div><label>Invited email<input required type="email" value={email} onChange={e=>setEmail(e.target.value)}/></label><button disabled={busy} className="primary">Create invitation</button>{error&&<div className="error" role="alert">{error}</div>}{url&&<div className="success-note"><b>Invitation ready · not emailed</b><p><Link href={url}>Open private invitation →</Link></p><small>This link grants access to the invited email only. Keep it private.</small></div>}</form>}</section>;
+}

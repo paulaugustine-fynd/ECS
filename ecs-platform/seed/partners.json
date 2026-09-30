@@ -1,0 +1,136 @@
+[
+  {
+    "id": "vnd_maz",
+    "code": "VND-MAZ",
+    "legalName": "Maison Azure FZ-LLC",
+    "displayName": "Maison Azure",
+    "status": "ACTIVE",
+    "riskTier": "LOW",
+    "trustedCatalogVendor": false,
+    "countries": [
+      "AE"
+    ],
+    "erpVendorId": "ERP-V-10421",
+    "settlement": {
+      "cadence": "WEEKLY",
+      "currency": "AED",
+      "paymentTermsDays": 7
+    },
+    "documents": [
+      {
+        "type": "TRADE_LICENSE",
+        "status": "APPROVED",
+        "expiresOn": "2027-06-30"
+      },
+      {
+        "type": "VAT_CERTIFICATE",
+        "status": "APPROVED"
+      },
+      {
+        "type": "BANK_LETTER",
+        "status": "APPROVED"
+      }
+    ]
+  },
+  {
+    "id": "vnd_lum",
+    "code": "VND-LUM",
+    "legalName": "Lumera Beauty Trading LLC",
+    "displayName": "Lumera Beauty",
+    "status": "ACTIVE",
+    "riskTier": "LOW",
+    "trustedCatalogVendor": true,
+    "countries": [
+      "AE",
+      "SA"
+    ],
+    "erpVendorId": "ERP-V-10788",
+    "settlement": {
+      "cadence": "FORTNIGHTLY",
+      "currency": "AED",
+      "paymentTermsDays": 14
+    },
+    "documents": [
+      {
+        "type": "TRADE_LICENSE",
+        "status": "APPROVED",
+        "expiresOn": "2027-02-28"
+      },
+      {
+        "type": "VAT_CERTIFICATE",
+        "status": "APPROVED"
+      },
+      {
+        "type": "BANK_LETTER",
+        "status": "APPROVED"
+      }
+    ]
+  },
+  {
+    "id": "vnd_nrh",
+    "code": "VND-NRH",
+    "legalName": "Northline Home Distribution LLC",
+    "displayName": "Northline Home",
+    "status": "ACTIVE",
+    "riskTier": "MEDIUM",
+    "trustedCatalogVendor": false,
+    "countries": [
+      "AE",
+      "KW"
+    ],
+    "erpVendorId": "ERP-V-11002",
+    "settlement": {
+      "cadence": "MONTHLY",
+      "currency": "AED",
+      "paymentTermsDays": 30
+    },
+    "documents": [
+      {
+        "type": "TRADE_LICENSE",
+        "status": "APPROVED",
+        "expiresOn": "2027-08-31"
+      },
+      {
+        "type": "VAT_CERTIFICATE",
+        "status": "APPROVED"
+      },
+      {
+        "type": "BANK_LETTER",
+        "status": "APPROVED"
+      }
+    ]
+  },
+  {
+    "id": "vnd_orb",
+    "code": "VND-ORB",
+    "legalName": "Orbit Footwear MEA LLC",
+    "displayName": "Orbit Footwear",
+    "status": "SUSPENDED",
+    "riskTier": "HIGH",
+    "trustedCatalogVendor": false,
+    "countries": [
+      "AE"
+    ],
+    "erpVendorId": "ERP-V-10881",
+    "settlement": {
+      "cadence": "MONTHLY",
+      "currency": "AED",
+      "paymentTermsDays": 30
+    },
+    "suspension": {
+      "reasonCode": "COMPLIANCE_DOCUMENT_EXPIRED",
+      "effectiveAt": "2026-09-18T09:00:00Z"
+    },
+    "documents": [
+      {
+        "type": "TRADE_LICENSE",
+        "status": "EXPIRED",
+        "expiresOn": "2026-09-15"
+      },
+      {
+        "type": "VAT_CERTIFICATE",
+        "status": "APPROVED"
+      }
+    ]
+  }
+]

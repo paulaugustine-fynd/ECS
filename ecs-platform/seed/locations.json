@@ -1,0 +1,104 @@
+[
+  {
+    "id": "loc_ati_dc1",
+    "code": "ATI-DXB-DC01",
+    "name": "ATI Dubai Central DC",
+    "ownerType": "OPERATOR",
+    "ownerId": "cmp_ati_uae",
+    "type": "WAREHOUSE",
+    "country": "AE",
+    "city": "Dubai",
+    "status": "ACTIVE",
+    "tags": [
+      "operator",
+      "warehouse",
+      "priority-1"
+    ],
+    "fyndLocationId": "940001"
+  },
+  {
+    "id": "loc_maz_store1",
+    "code": "MAZ-DXB-MALL01",
+    "name": "Maison Azure Dubai Mall",
+    "ownerType": "PARTNER",
+    "ownerId": "vnd_maz",
+    "type": "BRAND_STORE",
+    "country": "AE",
+    "city": "Dubai",
+    "status": "ACTIVE",
+    "tags": [
+      "external-concession",
+      "brand-store",
+      "vendor:vnd_maz"
+    ],
+    "fyndLocationId": "940101"
+  },
+  {
+    "id": "loc_maz_wh1",
+    "code": "MAZ-JAFZA-WH01",
+    "name": "Maison Azure JAFZA Warehouse",
+    "ownerType": "PARTNER",
+    "ownerId": "vnd_maz",
+    "type": "VENDOR_WAREHOUSE",
+    "country": "AE",
+    "city": "Dubai",
+    "status": "ACTIVE",
+    "tags": [
+      "external-concession",
+      "warehouse",
+      "vendor:vnd_maz"
+    ],
+    "fyndLocationId": "940102"
+  },
+  {
+    "id": "loc_lum_wh1",
+    "code": "LUM-DXB-WH01",
+    "name": "Lumera Beauty Dubai Warehouse",
+    "ownerType": "PARTNER",
+    "ownerId": "vnd_lum",
+    "type": "VENDOR_WAREHOUSE",
+    "country": "AE",
+    "city": "Dubai",
+    "status": "ACTIVE",
+    "tags": [
+      "external-concession",
+      "warehouse",
+      "vendor:vnd_lum"
+    ],
+    "fyndLocationId": "940201"
+  },
+  {
+    "id": "loc_nrh_wh1",
+    "code": "NRH-DXB-WH01",
+    "name": "Northline Home Dubai Warehouse",
+    "ownerType": "PARTNER",
+    "ownerId": "vnd_nrh",
+    "type": "VENDOR_WAREHOUSE",
+    "country": "AE",
+    "city": "Dubai",
+    "status": "ACTIVE",
+    "tags": [
+      "external-concession",
+      "warehouse",
+      "vendor:vnd_nrh"
+    ],
+    "fyndLocationId": "940301"
+  },
+  {
+    "id": "loc_orb_store1",
+    "code": "ORB-DXB-STORE01",
+    "name": "Orbit Footwear City Walk",
+    "ownerType": "PARTNER",
+    "ownerId": "vnd_orb",
+    "type": "BRAND_STORE",
+    "country": "AE",
+    "city": "Dubai",
+    "status": "SUSPENDED",
+    "tags": [
+      "external-concession",
+      "brand-store",
+      "vendor:vnd_orb"
+    ],
+    "fyndLocationId": "940401"
+  }
+]

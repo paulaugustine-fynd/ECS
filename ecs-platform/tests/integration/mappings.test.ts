@@ -1,0 +1,73 @@
+import {beforeAll,afterAll,it,expect} from 'vitest';
+import {randomUUID} from 'node:crypto';
+import type {FastifyInstance} from 'fastify';
+import {db} from '../../packages/db/client';
+import {seedDemo} from '../../prisma/seed';
+import {createServer} from '../../apps/api/src/server';
+import {createMockServer} from '../../apps/mock-systems/src/server';
+import {processOutbox} from '../../apps/worker/src/outbox';
+import {mappingReadiness,queueMappings} from '../../packages/domain/mappings';
+import {transaction} from '../../packages/db/transaction';
+import {provisionFixture} from '../helpers/provision';
+const id=`mapping-${randomUUID()}`,productId=`product-${id}`;
+const actor={id:'mapping-test',companyId:'cmp_ati_uae',partnerId:null,markets:['AE'],role:'ATI_SUPER_ADMIN'};
+let app:FastifyInstance,mocks:FastifyInstance,headers:Record<string,string>,locationId:string,inventoryId:string,externalId:string;
+const input={name:'Mapping test warehouse',partnerId:id,market:'AE',type:'VENDOR_WAREHOUSE',status:'ACTIVE',deliveryCities:['Dubai'],cutoffHour:18,dailyCapacity:100,reason:'Fictional mapping validation'};
+async function login(email:string){const r=await app.inject({method:'POST',url:'/api/v1/auth/login',payload:{email,password:'Demo123!'}});expect(r.statusCode,r.body).toBe(200);return {cookie:`${r.cookies[0].name}=${r.cookies[0].value}`,'x-csrf-token':r.json().csrfToken};}
+beforeAll(async()=>{
+ const url=new URL(process.env.DATABASE_URL??'');if(!['localhost','127.0.0.1'].includes(url.hostname)||url.pathname!=='/ecs_test')throw Error('Requires isolated local ecs_test');
+ if(!(await db.partner.count()))await seedDemo();
+ app=await createServer({verifyResponseContracts:true});mocks=createMockServer();await mocks.listen({port:4101,host:'127.0.0.1'});headers=await login('admin@ati.demo');
+ await db.partner.create({data:{id,code:id,companyId:actor.companyId,legalName:'Mapping Fixture LLC',displayName:'Mapping Fixture',status:'ACTIVE',markets:['AE'],fyndMapped:true,erpVendorId:'mock-erp-fixture'}});
+ await db.brandRight.create({data:{partnerId:id,brand:id,market:'AE',categories:['Beauty'],validFrom:new Date('2026-01-01Z'),validUntil:new Date('2028-01-01Z'),status:'APPROVED',evidence:'Fictional rights',reason:'Mapping validation'}});
+});
+afterAll(async()=>{await app?.close();await mocks?.close();await db.$disconnect();});
+it('creates locations idempotently and rejects arbitrary Fynd IDs, ownership changes and vendor writes',async()=>{
+ const payload={...input,requestId:randomUUID()};
+ const create=()=>app.inject({method:'POST',url:'/api/v1/locations',headers,payload});
+ const first=await create();expect(first.statusCode,first.body).toBe(200);locationId=first.json().id;
+ expect((await create()).json().id).toBe(locationId);expect(first.json()).toMatchObject({version:1,fyndId:null});
+ expect((await app.inject({method:'POST',url:'/api/v1/locations',headers,payload:{...payload,name:'Conflicting name'}})).statusCode).toBe(409);
+ expect((await app.inject({method:'POST',url:'/api/v1/locations',headers,payload:{...payload,requestId:randomUUID(),fyndId:'forged'}})).statusCode).toBe(400);
+ const vendor=await login('admin@maisonazure.demo');
+ expect((await app.inject({method:'POST',url:'/api/v1/locations',headers:vendor,payload})).statusCode).toBe(403);
+ const list=await app.inject({url:'/api/v1/locations',headers:vendor});expect(list.json().items.every((l:{partnerId:string})=>l.partnerId==='vnd_maz')).toBe(true);
+ expect((await app.inject({method:'POST',url:'/api/v1/locations',headers:{cookie:headers.cookie},payload})).statusCode).toBe(403);
+});
+it('ignores a seeded boolean and bare ID; requires both current acknowledgements and read-back',async()=>{
+ await db.location.update({where:{id:locationId},data:{fyndId:'seed-forged'}});
+ expect((await mappingReadiness(db,id)).passed).toBe(false);
+ await provisionFixture(id);const gate=await mappingReadiness(db,id);expect(gate.passed).toBe(true);expect(gate.mappings).toHaveLength(2);
+ externalId=(await db.location.findUniqueOrThrow({where:{id:locationId}})).fyndId!;expect(externalId).toMatch(/^mock-fynd-location-/);
+ const record=await db.mockMapping.findFirstOrThrow({where:{externalId}});
+ await db.mockMapping.update({where:{key:record.key},data:{fingerprint:'0'.repeat(64)}});
+ expect((await mappingReadiness(db,id)).passed).toBe(false);
+ await provisionFixture(id);expect((await mappingReadiness(db,id)).passed).toBe(true);
+ expect((await db.location.findUniqueOrThrow({where:{id:locationId}})).fyndId).toBe(externalId);
+});
+it('invalidates mapping on configuration edits without moving stock, and rejects stale queued work',async()=>{
+ await db.product.create({data:{id:productId,companyId:actor.companyId,partnerId:id,sku:`SKU-${id}`,titleEn:'Mapping product',titleAr:'اختبار',brand:id,category:'Beauty/Lips',price:'150',floor:'130',status:'PUBLISHED',data:{demoOnly:true}}});
+ for(const target of ['ERP','FYND','SFCC'])await db.publication.create({data:{productId,version:1,target,status:'SUCCEEDED',externalId:`fixture-${target}`}});
+ inventoryId=(await db.inventory.create({data:{productId,locationId,onHand:12,reserved:2,safetyStock:1,sequence:1,lastEligible:true}})).id;
+ await db.partner.update({where:{id},data:{version:{increment:1}}});
+ await transaction(tx=>queueMappings(tx,actor,id,'stale-mapping'));
+ const old=await db.outbox.findFirstOrThrow({where:{partnerId:id,operation:'provisionMapping',status:'PENDING',payload:{path:['kind'],equals:'LOCATION'}}});
+ const {partnerId:_,market:__,...edit}=input;void _;void __;
+ const response=await app.inject({method:'POST',url:`/api/v1/locations/${locationId}`,headers,payload:{...edit,expectedVersion:1,cutoffHour:17}});
+ expect(response.statusCode,response.body).toBe(200);expect(response.json()).toMatchObject({version:2,fyndId:null});
+ expect((await mappingReadiness(db,id)).passed).toBe(false);
+ expect(await db.inventory.findUniqueOrThrow({where:{id:inventoryId}})).toMatchObject({onHand:12,reserved:2,safetyStock:1,sequence:1,lastEligible:false});
+ await processOutbox(old.id);expect((await db.outbox.findUniqueOrThrow({where:{id:old.id}})).status).toBe('DEAD_LETTER');
+ expect(await db.mockRecord.count({where:{idempotencyKey:old.idempotencyKey}})).toBe(0);
+ expect((await app.inject({method:'POST',url:`/api/v1/locations/${locationId}`,headers,payload:{...edit,expectedVersion:1}})).statusCode).toBe(409);
+ await provisionFixture(id);expect((await mappingReadiness(db,id)).passed).toBe(true);
+ expect((await db.location.findUniqueOrThrow({where:{id:locationId}})).fyndId).toBe(externalId);
+ expect((await db.inventory.findUniqueOrThrow({where:{id:inventoryId}})).lastEligible).toBe(true);
+});
+it('new mandatory locations immediately gate existing availability until provisioning completes',async()=>{
+ const response=await app.inject({method:'POST',url:'/api/v1/locations',headers,payload:{...input,requestId:randomUUID(),name:'Second mandatory warehouse'}});
+ expect(response.statusCode,response.body).toBe(200);expect((await mappingReadiness(db,id)).passed).toBe(false);
+ expect(await db.inventory.findUniqueOrThrow({where:{id:inventoryId}})).toMatchObject({onHand:12,reserved:2,lastEligible:false});
+ await provisionFixture(id);expect((await mappingReadiness(db,id)).passed).toBe(true);
+ expect((await mappingReadiness(db,id)).mappings).toHaveLength(3);
+});

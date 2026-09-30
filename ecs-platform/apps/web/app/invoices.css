@@ -1,0 +1,8 @@
+.operations .invoice-references{padding:26px}
+.invoice-references h3{display:flex;align-items:center;gap:8px;font-size:16px;margin:8px 0 0}
+.invoice-references>p{font-size:12px;line-height:1.7;color:#746d80}
+.invoice-references .route-candidate{margin-top:20px}
+.invoice-references .route-candidate .badge{width:fit-content;color:#297757}
+.invoice-references .route-candidate .badge.red{color:#a42b2b}
+.invoice-references .catalog-form{max-width:640px}
+@media(max-width:760px){.operations .invoice-references{padding:18px}.invoice-references .operations-toolbar{align-items:flex-start;flex-wrap:wrap}}

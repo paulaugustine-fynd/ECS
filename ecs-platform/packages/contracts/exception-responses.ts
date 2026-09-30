@@ -1,0 +1,10 @@
+import {z} from 'zod';
+const kind=z.enum(['SLA','CATALOG_REVIEW','INTEGRATION_DLQ','INBOX_DLQ','FULFILMENT']),date=z.string().datetime(),count=z.number().int().nonnegative();
+const item=z.object({id:z.string(),kind,status:z.enum(['OPEN','REPLAY_REQUESTED','RESOLVED','WAIVED']),version:z.number().int().positive(),partnerId:z.string().nullable(),partnerName:z.string().nullable(),market:z.string(),title:z.string(),summary:z.string(),reason:z.string().nullable(),createdAt:date,updatedAt:date,resolvedAt:date.nullable(),assignee:z.object({id:z.string(),name:z.string(),active:z.boolean()}).strict().nullable(),source:z.object({type:z.enum(['SHIPMENT','RETURN','PRODUCT','INTEGRATION_JOB','INBOX_RECEIPT']),id:z.string(),status:z.string()}).strict().nullable(),actions:z.array(z.enum(['CLAIM','RELEASE','COMMENT','RESOLVE_REPORT'])),canReplay:z.boolean()}).strict();
+export const exceptionResponseSchemas={
+ 'POST /api/v1/shipments/{id}/issues':z.object({issueId:z.string(),exceptionId:z.string(),duplicate:z.boolean()}).strict(),
+ 'GET /api/v1/shipments/{id}/issues':z.object({items:z.array(z.object({id:z.string(),code:z.enum(['STOCK_MISMATCH','DAMAGED_ITEM','PICK_PACK_DELAY','CARRIER_DELAY','DELIVERY_ISSUE','OTHER']),severity:z.enum(['WARNING','CRITICAL']),details:z.string(),reportedStatus:z.string(),reportedVersion:z.number().int().positive(),createdAt:date,exceptionId:z.string().nullable(),status:z.enum(['OPEN','RESOLVED','UNAVAILABLE'])}).strict()),limit:z.literal(100)}).strict(),
+ 'GET /api/v1/exceptions':z.object({items:z.array(item),total:count,page:z.number().int().positive(),limit:z.number().int().positive(),kinds:z.array(kind),metrics:z.object({open:count,replayRequested:count,resolved:count,waived:count,unassigned:count}).strict()}).strict(),
+ 'GET /api/v1/exceptions/{id}':z.object({item,activity:z.array(z.object({id:z.string(),action:z.string(),reason:z.string().nullable(),createdAt:date,actorName:z.string()}).strict())}).strict(),
+ 'POST /api/v1/exceptions/{id}/commands':item,
+};

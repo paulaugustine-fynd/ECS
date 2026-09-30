@@ -1,0 +1,56 @@
+'use client';
+import {useEffect,useState} from 'react';
+import Link from 'next/link';
+import {Download,ChartNoAxesCombined,ArrowUpRight} from 'lucide-react';
+import {api,type User} from '../lib/api';
+import type {PerformanceReport,AnalyticsMetadata} from '../../../packages/contracts/analytics-responses';
+export const reportRoles=['ATI_SUPER_ADMIN','ATI_OPERATIONS_MANAGER','ATI_FINANCE_ANALYST','ATI_AUDITOR','VENDOR_ADMIN','VENDOR_FINANCE_VIEWER'];
+type Filters={market:string;from:string;to:string;partnerId:string;brand:string};
+const query=(f:Filters)=>new URLSearchParams(Object.entries(f).filter(([,v])=>v)).toString();
+const rate=(n:number|null)=>n===null?'Not measured':`${n}%`;
+export function Analytics({user,root,refreshToken}:{user:User;root:string;refreshToken:number}){
+ const allowed=reportRoles.includes(user.role),markets=user.markets.filter(m=>['AE','SA','KW'].includes(m));
+ const [draft,setDraft]=useState<Filters>({market:markets[0]??'AE',from:'',to:'',partnerId:'',brand:''});
+ const [applied,setApplied]=useState<Filters|null>(null),[meta,setMeta]=useState<AnalyticsMetadata|null>(null),[report,setReport]=useState<PerformanceReport|null>(null);
+ const [error,setError]=useState(''),[loading,setLoading]=useState(false),[exporting,setExporting]=useState(false);
+ useEffect(()=>{if(!allowed)return;let active=true;setMeta(null);setApplied(null);setReport(null);setError('');
+  void api<AnalyticsMetadata>(`/analytics/metadata?market=${draft.market}`).then(m=>{if(!active)return;setMeta(m);const nextDay=new Date(m.demoNow);nextDay.setUTCDate(nextDay.getUTCDate()+1);const f={market:m.market,from:m.demoNow.slice(0,7)+'-01',to:nextDay.toISOString().slice(0,10),partnerId:'',brand:''};setDraft(f);setApplied(f);}).catch(e=>{if(active)setError((e as Error).message);});return()=>{active=false;};
+ },[allowed,draft.market,user.id]);
+ useEffect(()=>{if(!allowed||!applied)return;let active=true;setLoading(true);setReport(null);setError('');
+  void api<PerformanceReport>(`/analytics/performance?${query(applied)}`).then(r=>{if(active)setReport(r);}).catch(e=>{if(active)setError((e as Error).message);}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};
+ },[allowed,applied,refreshToken,user.id]);
+ async function download(){if(!applied||!report)return;setExporting(true);setError('');try{const response=await fetch(`/api/v1/analytics/export?${query(applied)}`,{credentials:'same-origin'});if(!response.ok){const r=await response.json();throw Error(r.error?.message??'Export failed');}const url=URL.createObjectURL(await response.blob()),a=document.createElement('a');a.href=url;a.download=`ecs-performance-${applied.market}-${applied.from}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){setError((e as Error).message);}finally{setExporting(false);}}
+ if(!allowed)return <p className="error" role="alert">Your role cannot access performance reports.</p>;
+ const dirty=!!applied&&query(draft)!==query(applied),m=report?.metrics;
+ return <div className="analytics-workspace">
+  <section className="panel analytics-filters"><div className="panel-title"><div><h2>Performance overview</h2><p className="muted">Operational evidence from your authorized records · Mock integrations</p></div><button className="button" disabled={!report||loading||exporting} onClick={()=>void download()}><Download size={16}/>{exporting?'Exporting…':'Export report'}</button></div>
+   <form onSubmit={e=>{e.preventDefault();setApplied({...draft});}}>
+    <label>Market<select value={draft.market} onChange={e=>setDraft({...draft,market:e.target.value,partnerId:'',brand:''})}>{markets.map(v=><option key={v}>{v}</option>)}</select></label>
+    <label>From · UTC inclusive<input required type="date" value={draft.from} onChange={e=>setDraft({...draft,from:e.target.value})}/></label>
+    <label>To · UTC exclusive<input required type="date" value={draft.to} onChange={e=>setDraft({...draft,to:e.target.value})}/></label>
+    <label>Vendor<select disabled={!meta} value={draft.partnerId} onChange={e=>setDraft({...draft,partnerId:e.target.value,brand:''})}><option value="">All authorized vendors</option>{meta?.partners.map(p=><option key={p.id} value={p.id}>{p.displayName}</option>)}</select></label>
+    <label>Brand<select disabled={!meta} value={draft.brand} onChange={e=>setDraft({...draft,brand:e.target.value})}><option value="">All authorized brands</option>{meta?.brands.map(b=><option key={b}>{b}</option>)}</select></label>
+    <button className="primary" disabled={!meta||loading}>Apply filters</button>
+   </form><p className="footnote">{dirty?'Unapplied changes. The displayed report and export use the last applied filters.':'Order-created cohort · maximum 366 days · one market and currency per report.'}</p>
+  </section>
+  {error&&<p className="error" role="alert">{error}</p>}
+  {(!meta||loading)&&!error&&<p role="status" className="panel analytics-loading">Loading scoped report…</p>}
+  {report&&m&&<><div className="analytics-context"><span>{report.filters.from} → {report.filters.to} (exclusive) · {report.filters.market} · {report.currency}</span><span>{report.filters.partnerId?meta?.partners.find(p=>p.id===report.filters.partnerId)?.displayName:'All authorized vendors'} / {report.filters.brand??'All brands'}</span></div>
+   <div className="analytics-metrics">{[
+    ['Gross merchandise value',`${report.currency} ${m.gmv}`,'Captured gross line value; cancelled legs excluded'],
+    ['Delivered net sales',`${report.currency} ${m.deliveredSales}`,'Delivered line net value, before return refunds'],
+    ['Orders / shipment legs',`${m.orders} / ${m.shipments}`,`${m.cancelledShipments} cancelled legs included in counts`],
+    ['Fulfilment rate',rate(m.fulfilmentRate),`${m.deliveredShipments} delivered / ${m.shipments} total legs`],
+    ['Received return rate',rate(m.returnRate),`${m.receivedReturnUnits} received units / ${m.deliveredUnits} delivered units`],
+    ['SLA compliance',rate(m.slaCompliance),`${m.slaCompletedOnTime} on time / ${m.slaCompletedMeasured} completed measured milestones`],
+   ].map(([label,value,note])=><section className="analytics-metric" key={label}><h3>{label}</h3><strong>{value}</strong><p>{note}</p></section>)}</div>
+   {m.shipments===0&&<div className="panel analytics-empty"><ChartNoAxesCombined size={32}/><h2>No shipments in this cohort</h2><p>Try another date range or clear vendor/brand filters. Rates without a denominator are not measured, not zero.</p></div>}
+   <section className="panel analytics-table"><div className="panel-title"><h2>Vendor performance</h2><span className="muted">Ranked by GMV · {report.currency}</span></div><table><thead><tr>{['Vendor','Orders','Shipment legs','GMV','Delivered sales','Fulfilment','Received returns'].map(v=><th key={v}>{v}</th>)}</tr></thead><tbody>{report.partners.map(p=><tr key={p.id}><td><button className="text-button" onClick={()=>{const f={...applied!,partnerId:p.id};setDraft(f);setApplied(f);}}>{p.name} <ArrowUpRight size={13}/></button></td><td>{p.orders}</td><td>{p.shipments}</td><td>{p.gmv}</td><td>{p.deliveredSales}</td><td>{rate(p.fulfilmentRate)}</td><td>{rate(p.returnRate)}</td></tr>)}</tbody></table></section>
+   <div className="analytics-columns"><section className="panel analytics-table"><div className="panel-title"><h2>Brand performance</h2><span className="muted">{report.currency}</span></div><table><thead><tr><th>Brand</th><th>GMV</th><th>Delivered sales</th><th>Orders</th></tr></thead><tbody>{report.brands.map(b=><tr key={b.id}><td><button className="text-button" onClick={()=>{const f={...applied!,brand:b.id};setDraft(f);setApplied(f);}}>{b.name}</button></td><td>{b.gmv}</td><td>{b.deliveredSales}</td><td>{b.orders}</td></tr>)}</tbody></table></section>
+   <section className="panel analytics-table"><div className="panel-title"><h2>Order-date trend</h2><span className="muted">{report.currency} · dates with orders</span></div><table><thead><tr><th>UTC date</th><th>Orders</th><th>GMV</th></tr></thead><tbody>{report.trend.map(d=><tr key={d.date}><td>{d.date}</td><td>{d.orders}</td><td>{d.gmv}</td></tr>)}</tbody></table></section></div>
+   <div className="analytics-columns"><section className="panel analytics-insight"><h2>Inventory sync freshness</h2><p>Current snapshot for selected market/vendor/brand; independent of the order-date filter.</p><div className="analytics-sync"><span><b>{report.inventory.fresh}</b>Within 15 min</span><span><b>{report.inventory.stale}</b>Stale / clock anomaly</span><span><b>{report.inventory.pending}</b>Not acknowledged</span></div><p className="footnote">{report.inventory.positions} stock positions. Last successful current-revision mock Fynd inventory acknowledgement, measured against wall clock—not source-feed freshness or a live Fynd assertion.</p></section>
+   <section className="panel analytics-insight"><h2>{m.activeBreaches} active SLA breaches</h2><p>{m.slaLegacyExcluded} legacy observations excluded from compliance. {m.slaWaived} waived milestones reported separately. Cancelled legs are excluded from compliance.</p>{report.canDrillFulfilment?<><p className="footnote">Showing up to {report.breachListLimit} oldest breached milestones within this order cohort.</p>{report.breaches.map(b=><Link className="analytics-breach" key={b.id} href={`${root}/orders/${b.shipmentId}`}><span><b>{b.partnerName} · {b.stage.replaceAll('_',' ')}</b><small>{b.orderReference} · due {new Date(b.deadline).toISOString().replace('T',' ').slice(0,16)} UTC</small></span><ArrowUpRight size={17}/></Link>)}{!report.breaches.length&&<p>No active breached milestones in this cohort.</p>}</>:<p className="footnote">Shipment investigation is restricted to fulfilment roles; this view contains aggregate metrics only.</p>}</section></div>
+   <details className="panel analytics-definitions"><summary>Metric definitions & reporting boundaries</summary><p>Filters select orders created in the UTC interval, then calculate current outcomes for their authorized shipment lines. This is not a delivery-date sales ledger, settlement or tax report. Brand attribution uses the current canonical product, not a historical brand snapshot. Orders and mixed-brand shipments can appear in several rows; do not add distinct-order counts across rows.</p><p>GMV is quantity × captured unit gross before discounts. Delivered net sales use captured line net after discounts, before refunds. Return rate counts physically received returns (including QC failures), not requests or approvals. Fulfilment rate includes cancelled legs in its denominator. SLA compliance measures completed, event-timed, non-waived milestones on non-cancelled legs; open timers are not in its denominator. Breaches reflect the last monitor evaluation; viewing reports never changes workflow state.</p><p>CSV is freshly calculated with the last applied filters and may reflect activity since this view loaded. Reports fail with a clear size-limit error instead of truncating totals. Public sharing and scheduled/background reports remain pending.</p><p>Generated {report.generatedAt} · business clock {report.demoNow}. The business clock drives order/SLA events; inventory freshness uses wall clock.</p></details>
+  </>}
+ </div>;
+}

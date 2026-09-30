@@ -1,0 +1,10 @@
+'use client';
+import {useEffect,useState} from 'react';
+import Link from 'next/link';
+import {BloomShell} from '../../../components/bloom-shell';
+import {api} from '../../../lib/api';
+export default function Invitation(){
+  const[secret,setSecret]=useState(''),[email,setEmail]=useState(''),[name,setName]=useState(''),[password,setPassword]=useState(''),[error,setError]=useState(''),[done,setDone]=useState(false),[busy,setBusy]=useState(false);
+  useEffect(()=>{setSecret(location.hash.slice(1));},[]);
+  return <BloomShell><main className="invite-accept"><span className="eyebrow">BY INVITATION · PARTNER NETWORK</span><h1>A new chapter begins.</h1><p>Create your account to prepare a concession application for Al Tayer Insignia. Use fictional demonstration information only.</p>{done?<div className="success-note"><h2>Your partner account is ready.</h2><Link href="/login?next=/onboarding">Sign in and start your application →</Link></div>:<form className="onboard-fields" onSubmit={async e=>{e.preventDefault();setError('');setBusy(true);try{await api('/invitations/accept',{token:secret,email,name,password});setPassword('');history.replaceState(null,'',location.pathname);setSecret('');setDone(true);}catch(err){setError((err as Error).message);}finally{setBusy(false);}}}><label>Invited email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)} autoComplete="username"/></label><label>Your name<input required minLength={2} value={name} onChange={e=>setName(e.target.value)}/></label><label>Create password<input required type="password" minLength={12} value={password} onChange={e=>setPassword(e.target.value)} autoComplete="new-password"/></label><small>At least 12 characters. Invitation is single-use and expires after 24 hours. This step does not accept a commercial agreement.</small>{error&&<div className="error" role="alert">{error}</div>}<button className="primary black" disabled={busy||!secret}>Create partner account</button>{!secret&&<p>Open the complete invitation link supplied by your ATI partner manager.</p>}</form>}</main></BloomShell>;
+}

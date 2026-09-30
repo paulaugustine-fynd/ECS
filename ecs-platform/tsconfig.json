@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext", "moduleResolution": "Bundler", "strict": true,
+    "esModuleInterop": true, "skipLibCheck": true, "resolveJsonModule": true,
+    "jsx": "preserve", "noEmit": true, "allowJs": false,
+    "types": ["node"], "plugins": [{"name":"next"}]
+  },
+  "include": ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts", "prisma/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "apps/web/.next", "apps/web/.next-e2e"]
+}

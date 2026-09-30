@@ -1,0 +1,66 @@
+[
+  {
+    "email": "admin@ati.demo",
+    "name": "Aisha Rahman",
+    "role": "ATI_SUPER_ADMIN",
+    "password": "Demo123!",
+    "locale": "en",
+    "companyId": "cmp_ati_uae"
+  },
+  {
+    "email": "partner.manager@ati.demo",
+    "name": "Omar Khalid",
+    "role": "ATI_PARTNER_MANAGER",
+    "password": "Demo123!",
+    "locale": "en",
+    "companyId": "cmp_ati_uae"
+  },
+  {
+    "email": "catalog@ati.demo",
+    "name": "Mariam Noor",
+    "role": "ATI_CATALOG_MODERATOR",
+    "password": "Demo123!",
+    "locale": "ar",
+    "companyId": "cmp_ati_uae"
+  },
+  {
+    "email": "ops@ati.demo",
+    "name": "Daniel George",
+    "role": "ATI_OPERATIONS_MANAGER",
+    "password": "Demo123!",
+    "locale": "en",
+    "companyId": "cmp_ati_uae"
+  },
+  {
+    "email": "finance@ati.demo",
+    "name": "Sara Khan",
+    "role": "ATI_FINANCE_ANALYST",
+    "password": "Demo123!",
+    "locale": "en",
+    "companyId": "cmp_ati_uae"
+  },
+  {
+    "email": "admin@maisonazure.demo",
+    "name": "Leila Haddad",
+    "role": "VENDOR_ADMIN",
+    "password": "Demo123!",
+    "locale": "en",
+    "partnerId": "vnd_maz"
+  },
+  {
+    "email": "fulfilment@maisonazure.demo",
+    "name": "Yousef Ali",
+    "role": "VENDOR_FULFILMENT_OPERATOR",
+    "password": "Demo123!",
+    "locale": "ar",
+    "partnerId": "vnd_maz"
+  },
+  {
+    "email": "catalog@lumera.demo",
+    "name": "Nadine Farah",
+    "role": "VENDOR_CATALOG_MANAGER",
+    "password": "Demo123!",
+    "locale": "en",
+    "partnerId": "vnd_lum"
+  }
+]

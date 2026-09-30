@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+<rect width="800" height="1000" fill="#ECFDF5"/>
+<rect x="70" y="70" width="660" height="660" rx="40" fill="#ffffff" stroke="#0F766E" stroke-width="5"/>
+<circle cx="400" cy="330" r="170" fill="#0F766E" opacity="0.12"/>
+<path d="M260 515 Q400 245 540 515 L500 650 L300 650 Z" fill="#0F766E" opacity="0.75"/>
+<text x="80" y="815" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#0F766E">Northline Home</text>
+<text x="80" y="870" font-family="Arial, sans-serif" font-size="30" fill="#0F172A">Percale Duvet Cover</text>
+<text x="80" y="920" font-family="Arial, sans-serif" font-size="24" fill="#64748B">Queen</text>
+<text x="680" y="920" text-anchor="end" font-family="Arial, sans-serif" font-size="20" fill="#94A3B8">ECS DEMO</text>
+</svg>
